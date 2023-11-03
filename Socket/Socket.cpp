@@ -108,7 +108,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		}
 		memset(&this->serverPoll, 0, sizeof(this->serverPoll));
 		this->serverPoll.fd = serverSocket;
-		this->serverPoll.events = POLLIN;
+		this->serverPoll.events = POLLIN | POLLOUT;
 		std::cout << this->pollPos << std::endl;
 		addPollFds(this->serverPoll);
 		std::cout << this->pollPos << std::endl;
@@ -117,42 +117,32 @@ Socket::Socket(ServerConf data, char **envp_main)
 	}
 }
 
-
-
 void	Socket::pollinFunc(int i)
 {
-	char			*buffer;
-	std::string		header;
-	unsigned long	bodyLen;
+	char					*buffer;
+	static unsigned long	toRead = 50;
 
-    if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n"))
-	{
-		bodyLen = getContentLenght(this->requests[this->pollfds[i].fd]);
-		buffer = new char[bodyLen + 1];
-		memset(buffer, 0, bodyLen + 1);
-		if (bodyLen <= (unsigned long)this->serverInfo.getIntMbs())
-		{
-			int j = recv(this->pollfds[i].fd, buffer, bodyLen, MSG_DONTWAIT);
-			std::cout << "len: " << j << std::endl;
-			this->requests[this->pollfds[i].fd] += buffer;
-			std::cout << this->requests[this->pollfds[i].fd] << std::endl;
-		}
-    	this->pollfds[i].events = POLLOUT;
-		delete[] buffer;
-		return ;
-	}
-	buffer = new char[50];
-	memset(buffer, 0, 50);
-    int j = recv(this->pollfds[i].fd, buffer, 50, MSG_DONTWAIT);
-    buffer[j] = 0;
+	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n"))
+		this->pollfds[i].events = POLLOUT;
+	buffer = new char[toRead + 1];
+	memset(buffer, 0, toRead + 1);
+    recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
 	this->requests[this->pollfds[i].fd] += buffer;
-	std::cout << "sto leggendo" << std::endl;
+	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
+		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
+		toRead = getContentLenght(this->requests[this->pollfds[i].fd]);
+	else
+		toRead = 50;
+	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && 
+		!getContentLenght(this->requests[this->pollfds[i].fd]))
+		this->pollfds[i].events = POLLOUT;
+	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	delete[] buffer;
+
 }
 
 void	Socket::polloutFunc(int i)
 {
-
 	// this->rhMap[this->pollfds[i].fd].findMethodAndUrl();
 	// this->rhMap[this->pollfds[i].fd].checkLocation();
 	// std::string res = this->rhMap[this->pollfds[i].fd].getResponse();

@@ -29,7 +29,7 @@ void	Socket::addPollFds(struct pollfd newPoll)
 	if (this->pollPos < MAX_CONN)
 	{
 		this->pollfds[this->pollPos] = newPoll;
-		// this->fdsMap.insert(std::pair<int, std::string>(newPoll.fd, ""));
+		this->requests.insert(std::pair<int, std::string>(newPoll.fd, ""));
 		// this->rhMap.insert(std::pair<int, RequestHandler>(newPoll.fd, RequestHandler()));
 	}
 	this->pollPos++;
@@ -41,10 +41,10 @@ void	Socket::removePollFds()
 	{
 		if (this->pollfds[i].revents == POLLERR)
 		{
+			this->requests.erase(this->pollfds[i].fd);
 			close(this->pollfds[i].fd);
 			for (int j = i; j < this->pollPos; j++)
 				this->pollfds[j] = this->pollfds[j + 1];
-			// this->fdsMap.erase(this->pollfds[i].fd);
 			// this->rhMap.erase(this->pollfds[i].fd);
 			this->pollPos--;
 		}
@@ -101,22 +101,19 @@ Socket::Socket(ServerConf data, char **envp_main)
 
 void	Socket::pollinFunc(int i)
 {
-	char		buffer[2024];
+	char		buffer[50];
 	std::string	header;
 
 	memset(buffer, 0, sizeof(buffer));
     int j = recv(this->pollfds[i].fd, buffer, sizeof(buffer), MSG_DONTWAIT);
     buffer[j] = 0;
-	this->header += buffer;
-	std::cout << "Header: " << this->header << std::endl;
-    // if (strstr(buffer, "\r\n\r\n"))
-	// {
-    // 	std::cout << this->header << std::endl;
-    this->pollfds[i].events = POLLOUT;
-	this->header = "";
-	// 	return ;
-	// }
-	// std::cout << this->header << "hey" << std::endl;
+	this->requests[this->pollfds[i].fd] += buffer;
+    if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n"))
+	{
+		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+    	this->pollfds[i].events = POLLOUT;
+	}
+	std::cout << "sto leggendo" << std::endl;
 }
 
 void	Socket::polloutFunc(int i)
@@ -134,10 +131,10 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	std::cout << "pollPos: " << this->pollPos << std::endl;
+	std::cout << this->pollPos << std::endl;
 	if (poll(this->pollfds, this->pollPos, 500) > 0)
 	{
-		for (int i = 0 ; i < this->pollPos; i ++)
+		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)
 		{
 			if (this->pollfds[i].revents & POLLIN)
 			{
@@ -152,7 +149,7 @@ void	Socket::checkFd(void)
 				}
 			}
 		}
-		for (int i = 1; i < this->pollPos; i++)
+		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
 		{
 			if (this->pollfds[i].revents == POLLIN)
 			{

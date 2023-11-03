@@ -23,6 +23,7 @@ class Socket
 {
 private:
 	struct pollfd					pollfds[MAX_CONN];
+    std::map<int, std::string>      requests;
     ServerConf						serverInfo;
     std::vector<std::string>		envp;
 	int								pollPos;
@@ -31,7 +32,6 @@ private:
     socklen_t						clientAddrLen;
 	struct pollfd 					serverPoll;
     struct sockaddr_in				clientAddr;
-    std::string                     header;
 public:
     void                            polloutFunc(int i);
     void                            pollinFunc(int i);

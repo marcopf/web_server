@@ -4,6 +4,24 @@ Socket::Socket()
 {
 }
 
+unsigned long	getContentLenght(std::string header)
+{
+	int	pos;
+	unsigned long	newLinePos;
+	unsigned long	len;
+
+	len = 0;
+	pos = header.find("Content-Length");
+	if ((unsigned long)pos != std::string::npos)
+	{
+		newLinePos = header.find("\n", pos);
+		len = atoi(header.substr((pos + 15), newLinePos - pos).c_str());
+	}
+	else
+		std::cout << "NON trovato" << std::endl;
+	return (len);
+}
+
 std::string atachStatus(const char *status, const char *type, const char *body)
 {
 	std::stringstream ss;
@@ -99,21 +117,37 @@ Socket::Socket(ServerConf data, char **envp_main)
 	}
 }
 
+
+
 void	Socket::pollinFunc(int i)
 {
-	char		buffer[50];
-	std::string	header;
+	char			*buffer;
+	std::string		header;
+	unsigned long	bodyLen;
 
-	memset(buffer, 0, sizeof(buffer));
-    int j = recv(this->pollfds[i].fd, buffer, sizeof(buffer), MSG_DONTWAIT);
-    buffer[j] = 0;
-	this->requests[this->pollfds[i].fd] += buffer;
     if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n"))
 	{
-		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+		bodyLen = getContentLenght(this->requests[this->pollfds[i].fd]);
+		buffer = new char[bodyLen + 1];
+		memset(buffer, 0, bodyLen + 1);
+		if (bodyLen <= (unsigned long)this->serverInfo.getIntMbs())
+		{
+			int j = recv(this->pollfds[i].fd, buffer, bodyLen, MSG_DONTWAIT);
+			std::cout << "len: " << j << std::endl;
+			this->requests[this->pollfds[i].fd] += buffer;
+			std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+		}
     	this->pollfds[i].events = POLLOUT;
+		delete[] buffer;
+		return ;
 	}
+	buffer = new char[50];
+	memset(buffer, 0, 50);
+    int j = recv(this->pollfds[i].fd, buffer, 50, MSG_DONTWAIT);
+    buffer[j] = 0;
+	this->requests[this->pollfds[i].fd] += buffer;
 	std::cout << "sto leggendo" << std::endl;
+	delete[] buffer;
 }
 
 void	Socket::polloutFunc(int i)

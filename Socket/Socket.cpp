@@ -1,45 +1,8 @@
 #include "Socket.hpp"
+#include "RequestHelper.hpp"
 
 Socket::Socket()
 {
-}
-
-unsigned long	getContentLenght(std::string header)
-{
-	int	pos;
-	unsigned long	newLinePos;
-	unsigned long	len;
-
-	len = 0;
-	pos = header.find("Content-Length");
-	if ((unsigned long)pos != std::string::npos)
-	{
-		newLinePos = header.find("\n", pos);
-		len = atoi(header.substr((pos + 15), newLinePos - pos).c_str());
-	}
-	else
-		std::cout << "NON trovato" << std::endl;
-	return (len);
-}
-
-std::string atachStatus(const char *status, const char *type, const char *body)
-{
-	std::stringstream ss;
-	std::string status_s = status, body_s = body;
-	ss << "\r\nContent-length: " << body_s.length() << "\r\nContent-Type: " << type << "\r\n\r\n";
-	std::string res = status_s + ss.str() + body_s + "\r\n";
-	return (res);
-}
-
-std::string	fileToStr(std::string file)
-{
-	std::string str;
-	std::ifstream f(file.c_str());
-	std::ostringstream ss;
-	ss << f.rdbuf();
-	str = ss.str();
-	f.close();
-	return (str);
 }
 
 void	Socket::addPollFds(struct pollfd newPoll)
@@ -129,24 +92,22 @@ void	Socket::pollinFunc(int i)
     recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
 	this->requests[this->pollfds[i].fd] += buffer;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
-		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
-		toRead = getContentLenght(this->requests[this->pollfds[i].fd]);
+		&& RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
+		toRead = RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]);
 	else
 		toRead = 50;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && 
-		!getContentLenght(this->requests[this->pollfds[i].fd]))
+		!RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]))
 		this->pollfds[i].events = POLLOUT;
-	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	delete[] buffer;
-
 }
 
 void	Socket::polloutFunc(int i)
 {
 	// this->rhMap[this->pollfds[i].fd].findMethodAndUrl();
-	// this->rhMap[this->pollfds[i].fd].checkLocation();
+	// this->rhMap[this->pollfds[i].fd].checkLocation();RequestHelper
 	// std::string res = this->rhMap[this->pollfds[i].fd].getResponse();
-	std::string response = atachStatus("HTTP/1.1 200 OK", "text/html", fileToStr("./welcome.html").c_str());
+	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo);
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
@@ -155,7 +116,6 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	std::cout << this->pollPos << std::endl;
 	if (poll(this->pollfds, this->pollPos, 500) > 0)
 	{
 		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)

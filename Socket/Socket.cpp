@@ -71,10 +71,8 @@ Socket::Socket(ServerConf data, char **envp_main)
 		}
 		memset(&this->serverPoll, 0, sizeof(this->serverPoll));
 		this->serverPoll.fd = serverSocket;
-		this->serverPoll.events = POLLIN | POLLOUT;
-		std::cout << this->pollPos << std::endl;
+		this->serverPoll.events = POLLIN;
 		addPollFds(this->serverPoll);
-		std::cout << this->pollPos << std::endl;
 		std::cout << "Listening on port: " << this->serverInfo.getPorts()[i] << std::endl;
 
 	}
@@ -107,6 +105,7 @@ void	Socket::polloutFunc(int i)
 	// this->rhMap[this->pollfds[i].fd].findMethodAndUrl();
 	// this->rhMap[this->pollfds[i].fd].checkLocation();RequestHelper
 	// std::string res = this->rhMap[this->pollfds[i].fd].getResponse();
+	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo);
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
@@ -136,15 +135,9 @@ void	Socket::checkFd(void)
 		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
 		{
 			if (this->pollfds[i].revents == POLLIN)
-			{
 				this->pollinFunc(i);
-				return ;
-			}
-			if (this->pollfds[i].revents == POLLOUT)
-			{
+			else if (this->pollfds[i].revents == POLLOUT)
 				this->polloutFunc(i);
-				return ;
-			}
 		}
 	}
 }

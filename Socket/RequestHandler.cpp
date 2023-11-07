@@ -41,17 +41,37 @@ RequestHandler &RequestHandler::operator=(const RequestHandler &cpy)
     return (*this);
 }
 
+void    RequestHandler::crossRoads()
+{
+    if (this->method == "GET")
+        getRequestHandler();
+    else if (this->method == "POST")
+        postRequestHandler();
+    else if (this->method == "DELETE")
+        deleteRequestHandler();
+}
+
 void RequestHandler::requestFilter(long int matchedLocation)
 {
-    // if ((this->requestedUrl == "/" && this->info.getMethod().find(this->method) != std::string::npos)
-    //     || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos))
-    // {
-    if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
-        || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getAutoind() == "true") && this->info.locations_getter()[matchedLocation].getMethod().find("GET") != std::string::npos)
+    std::string redirectUrl = matchedLocation >= 0 ? this->info.locations_getter()[matchedLocation].getRedirect() : "null";
+    std::cout << redirectUrl << std::endl;
+
+    if ((this->requestedUrl == "/" && this->info.getMethod().find(this->method) != std::string::npos)
+        || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos))
+    {
+        if (redirectUrl != "null")
+        {
+            this->response = REDIRECT + redirectUrl + "\r\n\r\n";
+            std::cout << this->response << std::endl;
+        }
+        else if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
+            || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getAutoind() == "true" && this->info.locations_getter()[matchedLocation].getMethod().find("GET") != std::string::npos))
             this->response = callForAutoindex(matchedLocation);
-    // }
+        else
+            crossRoads();
+    }
     else
-        this->response = RequestHelper::atachStatus("HTTP/1.1 200 OK", "text/html", RequestHelper::fileToStr("./view/method_err.html").c_str());
+        this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/method_err.html").c_str());
 }
 
 std::string RequestHandler::start(std::string method, std::string requestedUrl)
@@ -73,13 +93,27 @@ std::string RequestHandler::start(std::string method, std::string requestedUrl)
 		}
     }
     this->requestFilter(matchedLocation);
-        std::cout << "Hey non ho trovato nulla!" << std::endl;
     return (this->response);
 }
 
 RequestHandler::RequestHandler(const RequestHandler &cpy)
 {
     *this = cpy;
+}
+
+void    RequestHandler::getRequestHandler()
+{
+    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/welcome.html").c_str());
+}
+
+void    RequestHandler::postRequestHandler()
+{
+    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
+}
+
+void    RequestHandler::deleteRequestHandler()
+{
+    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
 }
 
 RequestHandler::RequestHandler(ServerConf info, std::string req): info(info), request(req)

@@ -17,6 +17,7 @@
 #define BAD_REQUEST			"HTTP/1.1 400 Bad Request"
 #define NOT_FOUND			"HTTP/1.1 404 Not Found"
 #define	METHOD_NOT_ALLOWED	"HTTP/1.1 405 Method Not Allowed"
+#define REDIRECT            "HTTP/1.1 301 Moved Permanently\r\nLocation: "
 
 #define	HTML				"text/html"
 #define	PLAIN				"text/plain"
@@ -51,6 +52,10 @@ public:
     void        requestFilter(long int matchedLocation);
     std::string callForAutoindex(int i);
     std::string getSearchPath(int i);
+    void        crossRoads();
+    void        getRequestHandler();
+    void        postRequestHandler();
+    void        deleteRequestHandler();
     std::string autoindex(std::string directoryPath, int i);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);

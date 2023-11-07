@@ -42,12 +42,17 @@ std::string RequestHelper::findMethod(std::string req, ServerConf info)
 	RequestHandler parser(info, req);
 
     if (req.substr(0, 3) == "GET")
+	{
         return (parser.start("GET", findUrl(req)));
+	}
     else if (req.substr(0, 4) == "POST")
-        ;
+    {
+		return (parser.start("POST", findUrl(req)));
+	}
     else if (req.substr(0, 6) == "DELETE")
-        ;
-	//return status code error
+	{
+        return (parser.start("DELETE", findUrl(req)));
+	}
 	return (RequestHelper::atachStatus("HTTP/1.1 200 OK", "text/html", RequestHelper::fileToStr("./../view/method_err.html").c_str()));
 }
 

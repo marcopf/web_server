@@ -37,23 +37,23 @@ std::string	RequestHelper::fileToStr(std::string file)
 	return (str);
 }
 
-std::string RequestHelper::findMethod(std::string req, ServerConf info)
+std::string RequestHelper::findMethod(std::string req, ServerConf info, std::vector<std::string> envp)
 {
 	RequestHandler parser(info, req);
 
     if (req.substr(0, 3) == "GET")
 	{
-        return (parser.start("GET", findUrl(req)));
+        return (parser.start("GET", findUrl(req), envp));
 	}
     else if (req.substr(0, 4) == "POST")
     {
-		return (parser.start("POST", findUrl(req)));
+		return (parser.start("POST", findUrl(req), envp));
 	}
     else if (req.substr(0, 6) == "DELETE")
 	{
-        return (parser.start("DELETE", findUrl(req)));
+        return (parser.start("DELETE", findUrl(req), envp));
 	}
-	return (RequestHelper::atachStatus("HTTP/1.1 200 OK", "text/html", RequestHelper::fileToStr("./../view/method_err.html").c_str()));
+	return (RequestHelper::atachStatus("HTTP/1.1 405 Method Not Allowed", "text/html", RequestHelper::fileToStr("./view/method_err.html").c_str()));
 }
 
 std::string RequestHelper::findUrl(std::string req)

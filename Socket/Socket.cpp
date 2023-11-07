@@ -106,7 +106,7 @@ void	Socket::polloutFunc(int i)
 	// this->rhMap[this->pollfds[i].fd].checkLocation();RequestHelper
 	// std::string res = this->rhMap[this->pollfds[i].fd].getResponse();
 	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
-	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo);
+	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }

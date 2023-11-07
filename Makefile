@@ -1,6 +1,6 @@
 NAME    = server
 HEADER  = ${NAME:.a=.h}
-SRCS    = $(wildcard *.cpp) $(wildcard Socket/*.cpp) $(wildcard parser/*.cpp)
+SRCS    = $(wildcard *.cpp) $(wildcard Socket/*.cpp) $(wildcard parser/*.cpp) $(wildcard RequestManager/*.cpp)
 OBJS    = ${SRCS:.cpp=.o}
 FLAGS   = -std=c++98 -Wall  -Wextra 
 OPTIONS = -c

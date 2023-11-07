@@ -1,5 +1,5 @@
+#include "../Socket/RequestHelper.hpp"
 #include "RequestHandler.hpp"
-#include "RequestHelper.hpp"
 ServerConf RequestHandler::getInfo() const
 {
     return (this->info);
@@ -12,6 +12,10 @@ std::string RequestHandler::getReq() const
 std::string RequestHandler::getRes() const
 {
     return (this->response);
+}
+std::vector<std::string> RequestHandler::getEnvp() const
+{
+    return (this->envp);
 }
 std::string RequestHandler::getRequestedUrl() const
 {
@@ -38,43 +42,41 @@ RequestHandler &RequestHandler::operator=(const RequestHandler &cpy)
     this->method = cpy.getMethod();
     this->response = cpy.getRes();
     this->requestedUrl = cpy.getRequestedUrl();
+    this->envp = cpy.getEnvp();
     return (*this);
 }
 
-void    RequestHandler::crossRoads()
+void    RequestHandler::crossRoads(int matchedLocation)
 {
     if (this->method == "GET")
-        getRequestHandler();
+        getRequestHandler(matchedLocation);
     else if (this->method == "POST")
-        postRequestHandler();
+        postRequestHandler(matchedLocation);
     else if (this->method == "DELETE")
-        deleteRequestHandler();
+        deleteRequestHandler(matchedLocation);
 }
 
 void RequestHandler::requestFilter(long int matchedLocation)
 {
     std::string redirectUrl = matchedLocation >= 0 ? this->info.locations_getter()[matchedLocation].getRedirect() : "null";
-    std::cout << redirectUrl << std::endl;
 
+    std::cout << matchedLocation << std::endl;
     if ((this->requestedUrl == "/" && this->info.getMethod().find(this->method) != std::string::npos)
-        || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos))
+        || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos) || matchedLocation == -1)
     {
         if (redirectUrl != "null")
-        {
             this->response = REDIRECT + redirectUrl + "\r\n\r\n";
-            std::cout << this->response << std::endl;
-        }
         else if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
             || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getAutoind() == "true" && this->info.locations_getter()[matchedLocation].getMethod().find("GET") != std::string::npos))
             this->response = callForAutoindex(matchedLocation);
         else
-            crossRoads();
+            crossRoads(matchedLocation);
     }
     else
         this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/method_err.html").c_str());
 }
 
-std::string RequestHandler::start(std::string method, std::string requestedUrl)
+std::string RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)
 {
     std::vector<Location>    locations;
     long unsigned int           size = 0;
@@ -82,6 +84,7 @@ std::string RequestHandler::start(std::string method, std::string requestedUrl)
 
     this->setMethod(method);
     this->setRequestedUrl(requestedUrl);
+    this->envp = envp;
     locations = this->info.locations_getter();
     for (unsigned long i = 0; i < locations.size(); i++)
     {
@@ -101,20 +104,22 @@ RequestHandler::RequestHandler(const RequestHandler &cpy)
     *this = cpy;
 }
 
-void    RequestHandler::getRequestHandler()
+void	RequestHandler::addNewEnvp()
 {
-    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/welcome.html").c_str());
+	std::stringstream	ss;
+	std::string			data;
+    unsigned long       urlEnd = this->requestedUrl.find("?");
+
+    if (urlEnd != std::string::npos)
+    {
+        ss << this->requestedUrl.substr(urlEnd + 1);
+	    while (getline(ss, data, '&'))
+		    this->envp.push_back(data);
+        this->requestedUrl = this->requestedUrl.substr(0, urlEnd);
+    }
 }
 
-void    RequestHandler::postRequestHandler()
-{
-    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
-}
 
-void    RequestHandler::deleteRequestHandler()
-{
-    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
-}
 
 RequestHandler::RequestHandler(ServerConf info, std::string req): info(info), request(req)
 {

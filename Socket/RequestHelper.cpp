@@ -12,7 +12,8 @@ unsigned long	RequestHelper::getContentLenght(std::string header)
 	if ((unsigned long)pos != std::string::npos)
 	{
 		newLinePos = header.find("\n", pos);
-		len = atoi(header.substr((pos + 15), newLinePos - pos).c_str());
+		if (newLinePos != std::string::npos)
+			len = atoi(header.substr((pos + 15), newLinePos - pos).c_str());
 	}
 	return (len);
 }

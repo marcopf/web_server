@@ -38,7 +38,70 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
 
 void    RequestHandler::postRequestHandler(int matchedLocation)
 {
-    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
+	std::string	toAdd, path;
+	static int		newFileName;
+	std::string		requestBody = this->request.substr(this->request.find("\r\n\r\n") + 4);
+	std::stringstream body(requestBody);
+	std::string ret;
+	std::string line;
+	std::string boundary;
+	std::stringstream ss;
+	int	isFile = 2;
+	int counter = 1;
+
+	getline(body, boundary, '\r');
+	while (getline(body, line, '\r'))
+	{
+		if (line.find(boundary) != std::string::npos)
+		{
+			if (matchedLocation == -1)
+				toAdd = this->info.getPath();
+			else
+				toAdd = this->info.locations_getter()[matchedLocation].getPath();
+			if (toAdd != "" && toAdd != "null")
+			{
+				path = toAdd + "/" + ss.str().c_str();
+				mkdir(toAdd.c_str(), 0777);
+			}
+			else
+				path = ss.str().c_str();
+			std::ofstream newFile(path.c_str());
+			newFile << ret;
+			newFile.close();
+			counter = 1;
+			ret = "";
+			ss.str("");
+			isFile = 2;
+		}
+		if (line.find("Content-Disposition: form-data;") != std::string::npos)
+		{
+			if (line.find("filename=\"") == std::string::npos)
+				ss << "postFile(" << newFileName << ")";
+			unsigned long start = line.find("filename=\"") + 10;
+			if (start - 10 != std::string::npos)
+			{
+				isFile = 3;
+				unsigned long end = line.find("\"", start + 1);
+				ss << line.substr(start, end - start);
+			}
+			newFileName++;
+		}
+		if (counter > isFile)	
+			ret += line == "\n" ? "" : line;
+		counter++;
+	}
+	// while (getline(body, line, '\n'))
+	// {
+	// 	if (counter == 1)
+	// 		boundary = line.substr(0, line.length()-1);
+	// 	if (counter > 3)
+	// 		ret += (line + '\n');			
+	// 	counter++;
+	// }
+	// // std::cout << "boundary: |" << boundary << "|" <<  std::endl << "find: " << ret.find(boundary) << std::endl;
+	// ret = ret.substr(0, ret.find(boundary) - 2);
+	this->response =  atachStatus(SUCCESS, PLAIN, ret.c_str());
+	return ;
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)

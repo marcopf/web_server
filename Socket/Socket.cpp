@@ -32,16 +32,32 @@ void	Socket::removePollFds()
 	}
 }
 
+uint32_t	ft_inet_addr(std::string ip)
+{
+	std::stringstream 	ss(ip);
+	std::string			dataBuffer;
+	int					ipAddr[4];
+	int					i = 0;
+
+	while (getline(ss, dataBuffer, '.'))
+	{
+		ipAddr[i++] = atoi(dataBuffer.c_str());
+	}
+	return (htonl((0 | (ipAddr[0] << 24)) | (ipAddr[1] << 16) | (ipAddr[2] << 8) | ipAddr[3]));
+}
+
 Socket::Socket(ServerConf data, char **envp_main)
 {
 	int	serverSocket;
     int portsOption[this->serverInfo.getPorts().size()], i = -1;
+	std::string	hostValue;
 	
 	while (envp_main[++i])
 		this->envp.push_back(envp_main[i]);
 	this->pollPos = 0;
 	this->body = "";
 	this->serverInfo = data;
+	hostValue = this->serverInfo.getHost() != "null" ? this->serverInfo.getHost() : "127.0.0.1";
 	this->clientAddrLen = sizeof(clientAddr);
 	for (long unsigned int i = 0; i < this->serverInfo.getPorts().size(); i++)
 	{
@@ -56,7 +72,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		}
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(this->serverInfo.getPorts()[i]);
-		serverAddr.sin_addr.s_addr = INADDR_ANY;
+		serverAddr.sin_addr.s_addr = ft_inet_addr(hostValue);
 		if (bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1)
 		{
 			perror("error binding socket...");
@@ -73,7 +89,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		this->serverPoll.fd = serverSocket;
 		this->serverPoll.events = POLLIN;
 		addPollFds(this->serverPoll);
-		std::cout << "Listening on port: " << this->serverInfo.getPorts()[i] << std::endl;
+		std::cout << "Listening  on " <<  hostValue  << ":" << this->serverInfo.getPorts()[i] << std::endl;
 
 	}
 }
@@ -81,9 +97,9 @@ Socket::Socket(ServerConf data, char **envp_main)
 void	Socket::pollinFunc(int i)
 {
 	char					*buffer;
-	static unsigned long	toRead = 50;
+	static unsigned long	toRead = 1000;
 
-	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n"))
+	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])))
 		this->pollfds[i].events = POLLOUT;
 	buffer = new char[toRead + 1];
 	memset(buffer, 0, toRead + 1);
@@ -91,22 +107,25 @@ void	Socket::pollinFunc(int i)
 	this->requests[this->pollfds[i].fd] += buffer;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
 		&& RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
+		{
+			std::cout << "cl: " << RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]) << std::endl;
 		toRead = RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]);
+
+		}
 	else
-		toRead = 50;
-	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && 
-		!RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]))
+		toRead = 1000;
+	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])) || 
+		(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])))
 		this->pollfds[i].events = POLLOUT;
 	delete[] buffer;
 }
 
 void	Socket::polloutFunc(int i)
 {
-	// this->rhMap[this->pollfds[i].fd].findMethodAndUrl();
-	// this->rhMap[this->pollfds[i].fd].checkLocation();RequestHelper
-	// std::string res = this->rhMap[this->pollfds[i].fd].getResponse();
-	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+	std::cout << "sto per andare in pollout" << std::endl;
 	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
+
+	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
@@ -115,7 +134,7 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	if (poll(this->pollfds, this->pollPos, 500) > 0)
+	if (poll(this->pollfds, this->pollPos, 100) > 0)
 	{
 		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)
 		{

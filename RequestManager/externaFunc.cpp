@@ -9,7 +9,7 @@ std::string atachStatus(const char *status, const char *type, const char *body)
 {
 	std::stringstream ss;
 	std::string status_s = status, body_s = body;
-	ss << "\r\nContent-length: " << body_s.length() << "\r\nContent-Type: " << type << "\r\n\r\n";
+	ss << "\r\nContent-length: " << body_s.length() << "\r\n\r\n";
 	std::string res = status_s + ss.str() + body_s + "\r\n";
 	return (res);
 }

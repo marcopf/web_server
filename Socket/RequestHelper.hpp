@@ -7,6 +7,7 @@
 #include <cstring>
 #include "../parser/ServerConf.hpp"
 #include "../RequestManager/RequestHandler.hpp"
+#include <signal.h>
 #include <stdlib.h>
 
 

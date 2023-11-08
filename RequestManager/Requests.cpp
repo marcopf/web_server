@@ -36,43 +36,46 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
 		this->response = atachStatus(NOT_FOUND, HTML, fileToStr(ERR_PAGE).c_str());
 }
 
+void	RequestHandler::createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret)
+{
+	std::string toAdd, path;
+
+	if (matchedLocation == -1)
+		toAdd = this->info.getPath();
+	else
+		toAdd = this->info.locations_getter()[matchedLocation].getPath();
+	if (toAdd != "" && toAdd != "null")
+	{
+		path = toAdd + "/" + filename.str().c_str();
+		mkdir(toAdd.c_str(), 0777);
+	}
+	else
+		path = filename.str().c_str();
+	std::ofstream newFile(path.c_str());
+	newFile << ret;
+	newFile.close();
+	counter = 1;
+	ret = "";
+	filename.str("");
+	isFile = 2;
+}
+
 void    RequestHandler::postRequestHandler(int matchedLocation)
 {
-	std::string	toAdd, path;
-	static int		newFileName;
-	std::string		requestBody = this->request.substr(this->request.find("\r\n\r\n") + 4);
-	std::stringstream body(requestBody);
-	std::string ret;
-	std::string line;
-	std::string boundary;
-	std::stringstream ss;
-	int	isFile = 2;
-	int counter = 1;
+	static int			newFileName;
+	int					isFile = 2;
+	int					counter = 1;
+	std::stringstream	body(this->request.substr(this->request.find("\r\n\r\n") + 4));
+	std::stringstream	ss;
+	std::string 		ret;
+	std::string 		line;
+	std::string 		boundary;
 
 	getline(body, boundary, '\r');
 	while (getline(body, line, '\r'))
 	{
 		if (line.find(boundary) != std::string::npos)
-		{
-			if (matchedLocation == -1)
-				toAdd = this->info.getPath();
-			else
-				toAdd = this->info.locations_getter()[matchedLocation].getPath();
-			if (toAdd != "" && toAdd != "null")
-			{
-				path = toAdd + "/" + ss.str().c_str();
-				mkdir(toAdd.c_str(), 0777);
-			}
-			else
-				path = ss.str().c_str();
-			std::ofstream newFile(path.c_str());
-			newFile << ret;
-			newFile.close();
-			counter = 1;
-			ret = "";
-			ss.str("");
-			isFile = 2;
-		}
+			createFile(ss, matchedLocation, isFile, counter, ret);
 		if (line.find("Content-Disposition: form-data;") != std::string::npos)
 		{
 			if (line.find("filename=\"") == std::string::npos)
@@ -90,16 +93,6 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 			ret += line == "\n" ? "" : line;
 		counter++;
 	}
-	// while (getline(body, line, '\n'))
-	// {
-	// 	if (counter == 1)
-	// 		boundary = line.substr(0, line.length()-1);
-	// 	if (counter > 3)
-	// 		ret += (line + '\n');			
-	// 	counter++;
-	// }
-	// // std::cout << "boundary: |" << boundary << "|" <<  std::endl << "find: " << ret.find(boundary) << std::endl;
-	// ret = ret.substr(0, ret.find(boundary) - 2);
 	this->response =  atachStatus(SUCCESS, PLAIN, ret.c_str());
 	return ;
 }

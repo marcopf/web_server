@@ -56,6 +56,7 @@ public:
     void                        postRequestHandler(int matchedLocation);
     void                        deleteRequestHandler(int matchedLocation);
     void                        addNewEnvp();
+    void                        createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret);
     std::string                 autoindex(std::string directoryPath, int i);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);

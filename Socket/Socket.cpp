@@ -130,7 +130,7 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	int res = poll(this->pollfds, this->pollPos, 100000);
+	int res = poll(this->pollfds, this->pollPos, 5);
 	// std::cout << "ho pollato" << std::endl;
 	if (res > 0)
 	{

@@ -70,7 +70,16 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	std::string 		ret;
 	std::string 		line;
 	std::string 		boundary;
+	unsigned long		pos = this->requestedUrl.find("cgi-bin");
+	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
 
+	addNewEnvp();
+    if (pos != std::string::npos && baseCgiPath != "null")
+    {
+        std::string fileName = this->requestedUrl.substr(pos + 7);
+        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp);
+		return ;
+    }
 	getline(body, boundary, '\r');
 	while (getline(body, line, '\r'))
 	{

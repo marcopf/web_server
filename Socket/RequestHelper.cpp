@@ -18,7 +18,7 @@ unsigned long	RequestHelper::getContentLenght(std::string header)
 	return (len);
 }
 
-std::string RequestHelper::atachStatus(const char *status, const char *type, const char *body)
+std::string RequestHelper::atachStatus(const char *status, const char *body)
 {
 	std::stringstream ss;
 	std::string status_s = status, body_s = body;
@@ -54,7 +54,7 @@ std::string RequestHelper::findMethod(std::string req, ServerConf info, std::vec
 	{
         return (parser.start("DELETE", findUrl(req), envp));
 	}
-	return (RequestHelper::atachStatus("HTTP/1.1 405 Method Not Allowed", "text/html", RequestHelper::fileToStr("./view/method_err.html").c_str()));
+	return (RequestHelper::atachStatus("HTTP/1.1 405 Method Not Allowed", RequestHelper::fileToStr("./view/method_err.html").c_str()));
 }
 
 std::string RequestHelper::findUrl(std::string req)

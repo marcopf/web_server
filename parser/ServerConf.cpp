@@ -69,9 +69,19 @@ std::vector<int>	ServerConf::getPorts() const
 	std::stringstream 			ss(this->port);
 	std::string					data;
 	std::vector<int>	ports;
+	bool				isAlreadyIn = false;
 
 	while (getline(ss, data, ' '))
-		ports.push_back(atoi(data.c_str()));
+	{
+		for (unsigned long  i = 0; i < ports.size(); i++)
+		{
+			if (ports[i] == atoi(data.c_str()))
+			isAlreadyIn = true;
+		}
+		if (!isAlreadyIn)
+			ports.push_back(atoi(data.c_str()));
+		isAlreadyIn = false;
+	}
 	return (ports);
 }
 

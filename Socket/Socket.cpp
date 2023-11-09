@@ -52,6 +52,7 @@ Socket::Socket(ServerConf data, char **envp_main)
     int portsOption[this->serverInfo.getPorts().size()], i = -1;
 	std::string	hostValue;
 	
+	memset(this->pollfds, 0, sizeof(struct pollfd) * MAX_CONN);
 	while (envp_main[++i])
 		this->envp.push_back(envp_main[i]);
 	this->pollPos = 0;

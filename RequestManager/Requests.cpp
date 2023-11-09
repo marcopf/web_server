@@ -12,9 +12,9 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     if (matchedLocation == -1 && this->requestedUrl == "/")
 	{
 		if (this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
-			this->response = atachStatus(SUCCESS, HTML, fileToStr(this->info.getIndex().c_str()).c_str());
+			this->response = atachStatus(SUCCESS, fileToStr(this->info.getIndex().c_str()).c_str());
 		else
-			this->response = atachStatus(SUCCESS, HTML, fileToStr(WELCOME).c_str());
+			this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str());
 	}
     else if (pos != std::string::npos && baseCgiPath != "null")
     {
@@ -22,18 +22,18 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
         this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp);
     }
     else if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
-		this->response = atachStatus(SUCCESS, HTML,fileToStr(completePath.c_str()).c_str());
+		this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str());
 	else if (isDir(completePath.c_str()))
 	{
 		if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
-			this->response = atachStatus(SUCCESS, HTML, fileToStr(this->info.locations_getter()[matchedLocation].getIndex().c_str()).c_str());
+			this->response = atachStatus(SUCCESS, fileToStr(this->info.locations_getter()[matchedLocation].getIndex().c_str()).c_str());
 		else
-			this->response = atachStatus(SUCCESS, HTML, fileToStr(WELCOME).c_str());
+			this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str());
 	}
 	else if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
-		this->response = atachStatus(NOT_FOUND, HTML,fileToStr(this->info.getErrPage().c_str()).c_str());
+		this->response = atachStatus(NOT_FOUND,fileToStr(this->info.getErrPage().c_str()).c_str());
 	else
-		this->response = atachStatus(NOT_FOUND, HTML, fileToStr(ERR_PAGE).c_str());
+		this->response = atachStatus(NOT_FOUND, fileToStr(ERR_PAGE).c_str());
 }
 
 void	RequestHandler::createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret)
@@ -93,11 +93,24 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 			ret += line == "\n" ? "" : line;
 		counter++;
 	}
-	this->response =  atachStatus(SUCCESS, PLAIN, ret.c_str());
+	this->response =  atachStatus(SUCCESS, ret.c_str());
 	return ;
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)
 {
-    this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, "text/html", RequestHelper::fileToStr("./view/temp_err.html").c_str());
+	(void)matchedLocation;
+	addNewEnvp();
+	for (unsigned long i = 0; i < this->envp.size(); i++)
+	{
+		if ("fileToDelete" == this->envp[i].substr(0, 12))
+		{
+			if (unlink(this->envp[i].substr(13).c_str()) == -1)
+				this->response = RequestHelper::atachStatus(NOT_FOUND_DELETE, RequestHelper::fileToStr("./view/err.html").c_str());
+			else
+				this->response = RequestHelper::atachStatus(SUCCESS, RequestHelper::fileToStr("./view/welcome.html").c_str());
+			return ;
+		}
+	}
+    this->response = RequestHelper::atachStatus(NOT_FOUND, RequestHelper::fileToStr("./view/err.html").c_str());
 }

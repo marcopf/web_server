@@ -5,7 +5,7 @@ bool fileExists(const char* fileName) {
     return file.good();
 }
 
-std::string atachStatus(const char *status, const char *type, const char *body)
+std::string atachStatus(const char *status, const char *body)
 {
 	std::stringstream ss;
 	std::string status_s = status, body_s = body;

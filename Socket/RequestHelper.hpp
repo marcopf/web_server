@@ -37,7 +37,7 @@ private:
 public:
     static std::string fileToStr(std::string str);
     static unsigned long getContentLenght(std::string str);
-    static std::string atachStatus(const char *status, const char *type, const char *body);
+    static std::string atachStatus(const char *status, const char *body);
     static std::string findUrl(std::string req);
     static std::string findMethod(std::string str, ServerConf info, std::vector<std::string> envp);
     static std::string executeFile(std::string path, std::vector<std::string> envp);

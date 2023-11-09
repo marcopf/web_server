@@ -46,7 +46,7 @@ char	**convertVector(std::vector<std::string> vect)
 {
 	char	**ret;
 
-	ret = (char **)malloc(sizeof(char *) * vect.size() + 1);
+	ret = (char **)malloc(sizeof(char *) * (vect.size() + 1));
 	ret[vect.size()] = 0;
 	for (unsigned long i = 0; i < vect.size(); i++)
 		ret[i] = strdup(vect[i].c_str());
@@ -77,6 +77,15 @@ std::string	waitAndCheck(int pid, int *fd)
 	return ("OK");
 }
 
+std::string atachStatusCgi(const char *status, const char *body)
+{
+	std::stringstream ss;
+	std::string status_s = status, body_s = body;
+	ss << "\r\nContent-length: " << body_s.length() << "\r\n" << "Content-Type: text/html"  << "\r\n\r\n";
+	std::string res = status_s + ss.str() + body_s + "\r\n";
+	return (res);
+}
+
 std::string	RequestHelper::executeFile(std::string path, std::vector<std::string> envp)
 {
 	std::string		executed, result, command = extensionFinder(path);
@@ -97,9 +106,9 @@ std::string	RequestHelper::executeFile(std::string path, std::vector<std::string
 	}
 	result = waitAndCheck(pid, fd);
 	if (result != "OK")
-		return RequestHelper::atachStatus(NOT_FOUND, HTML, result.c_str());
+		return RequestHelper::atachStatus(NOT_FOUND, result.c_str());
 	while (read(fd[0], &c, 1))
 		executed += c;
 	close(fd[0]);
-	return atachStatus(SUCCESS, HTML, executed.c_str());
+	return atachStatusCgi(SUCCESS, executed.c_str());
 }

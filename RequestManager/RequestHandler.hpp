@@ -16,6 +16,7 @@
 #define SUCCESS				"HTTP/1.1 200 OK"
 #define BAD_REQUEST			"HTTP/1.1 400 Bad Request"
 #define NOT_FOUND			"HTTP/1.1 404 Not Found"
+#define NOT_FOUND_DELETE    "HTTP/1.1 410 Gone"
 #define	METHOD_NOT_ALLOWED	"HTTP/1.1 405 Method Not Allowed"
 #define REDIRECT            "HTTP/1.1 301 Moved Permanently\r\nLocation: "
 
@@ -71,6 +72,6 @@ void		freeMat(char **mat);
 char 		**createMat(std::string command, std::string path);
 std::string	fileToStr(std::string file);
 std::string	getCurrentRoot(ServerConf serv, int i);
-std::string atachStatus(const char *status, const char *type, const char *body);
+std::string atachStatus(const char *status, const char *body);
 
 #endif

@@ -17,7 +17,7 @@
 #include <map>
 #include "../parser/ServerConf.hpp"
 
-#define	MAX_CONN 100
+#define	MAX_CONN 300
 
 class Socket
 {

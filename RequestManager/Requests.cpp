@@ -99,16 +99,20 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)
 {
-	(void)matchedLocation;
+	// (void)matchedLocation;
+	std::string	uploadDirectory = matchedLocation == -1 ? this->info.getPath() : this->info.locations_getter()[matchedLocation].getPath();
+
 	addNewEnvp();
 	for (unsigned long i = 0; i < this->envp.size(); i++)
 	{
 		if ("fileToDelete" == this->envp[i].substr(0, 12))
 		{
-			if (unlink(this->envp[i].substr(13).c_str()) == -1)
+			if (this->envp[i].substr(13).find("..") == std::string::npos &&  unlink((uploadDirectory + "/" + this->envp[i].substr(13)).c_str()) == -1)
 				this->response = RequestHelper::atachStatus(NOT_FOUND_DELETE, RequestHelper::fileToStr("./view/err.html").c_str());
-			else
+			else if (this->envp[i].substr(13).find("..") == std::string::npos)
 				this->response = RequestHelper::atachStatus(SUCCESS, RequestHelper::fileToStr("./view/welcome.html").c_str());
+			else
+				this->response = RequestHelper::atachStatus(NOT_FOUND, RequestHelper::fileToStr("./view/err.html").c_str());
 			return ;
 		}
 	}

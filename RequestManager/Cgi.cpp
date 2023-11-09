@@ -8,9 +8,7 @@ char **createMat(std::string command, std::string path)
 	if (command == "./")
 		command += path;
 	mat[0] = strdup(command.c_str());
-	std::cout << command << std::endl;
 	mat[1] = strdup(path.c_str());
-		std::cout << path << std::endl;
 	mat[2] = 0;
 	return (mat);
 }

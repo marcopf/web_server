@@ -108,25 +108,20 @@ void	Socket::pollinFunc(int i)
 	this->requests[this->pollfds[i].fd] += buffer;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
 		&& RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
-		{
-			std::cout << "cl: " << RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]) << std::endl;
 		toRead = RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd]);
-
-		}
 	else
 		toRead = 1000;
 	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])) || 
 		(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])))
 		this->pollfds[i].events = POLLOUT;
+		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	delete[] buffer;
 }
 
 void	Socket::polloutFunc(int i)
 {
-	std::cout << "sto per andare in pollout" << std::endl;
 	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
 
-	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
@@ -135,7 +130,9 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	if (poll(this->pollfds, this->pollPos, 100) > 0)
+	int res = poll(this->pollfds, this->pollPos, 100000);
+	// std::cout << "ho pollato" << std::endl;
+	if (res > 0)
 	{
 		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)
 		{

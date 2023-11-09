@@ -60,7 +60,6 @@ void RequestHandler::requestFilter(long int matchedLocation)
 {
     std::string redirectUrl = matchedLocation >= 0 ? this->info.locations_getter()[matchedLocation].getRedirect() : "null";
 
-    std::cout << matchedLocation << std::endl;
     if ((this->requestedUrl == "/" && this->info.getMethod().find(this->method) != std::string::npos)
         || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos) || matchedLocation == -1)
     {

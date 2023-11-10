@@ -40,7 +40,7 @@ public:
     static std::string atachStatus(const char *status, const char *body);
     static std::string findUrl(std::string req);
     static std::string findMethod(std::string str, ServerConf info, std::vector<std::string> envp);
-    static std::string executeFile(std::string path, std::vector<std::string> envp);
+    static std::string executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
     RequestHelper(/* args */);
     ~RequestHelper();
 };

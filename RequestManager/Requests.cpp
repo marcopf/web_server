@@ -19,7 +19,7 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     else if (pos != std::string::npos && baseCgiPath != "null")
     {
         fileName = this->requestedUrl.substr(pos + 7);
-        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp);
+        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp, 0);
     }
     else if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
 		this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str());
@@ -77,7 +77,7 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
     if (pos != std::string::npos && baseCgiPath != "null")
     {
         std::string fileName = this->requestedUrl.substr(pos + 7);
-        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp);
+        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp, (char *)body.str().c_str());
 		return ;
     }
 	getline(body, boundary, '\r');

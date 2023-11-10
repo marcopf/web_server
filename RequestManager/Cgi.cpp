@@ -1,6 +1,6 @@
 #include "../Socket/RequestHelper.hpp"
 
-char **createMat(std::string command, std::string path)
+char **createMat(std::string command, std::string path, char  *cgiParamater)
 {
 	char **mat;
 
@@ -8,8 +8,11 @@ char **createMat(std::string command, std::string path)
 	if (command == "./")
 		command += path;
 	mat[0] = strdup(command.c_str());
-	mat[1] = strdup(path.c_str());
-	mat[2] = 0;
+	if (cgiParamater)
+		mat[1] = strdup((path + " " + std::string(cgiParamater)).c_str());
+	else
+		mat[1] = strdup(path.c_str());
+	mat[2] = NULL;
 	return (mat);
 }
 
@@ -84,7 +87,7 @@ std::string atachStatusCgi(const char *status, const char *body)
 	return (res);
 }
 
-std::string	RequestHelper::executeFile(std::string path, std::vector<std::string> envp)
+std::string	RequestHelper::executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter)
 {
 	std::string		executed, result, command = extensionFinder(path);
 	int				fd[2], pid;
@@ -96,7 +99,7 @@ std::string	RequestHelper::executeFile(std::string path, std::vector<std::string
 	pid = fork();
 	if (pid == 0)
 	{
-		mat = createMat(command, path);
+		mat = createMat(command, path, cgiParameter);
 		close(fd[0]);
 		dup2(fd[1], 1);
 		if (execve(mat[0], mat, convertVector(envp)) == -1)
@@ -107,6 +110,7 @@ std::string	RequestHelper::executeFile(std::string path, std::vector<std::string
 		return RequestHelper::atachStatus(NOT_FOUND, result.c_str());
 	while (read(fd[0], &c, 1))
 		executed += c;
+	std::cout << "XXXXXXXXXX" <<  executed << "XXXXXXX" << std::endl;
 	close(fd[0]);
 	return atachStatusCgi(SUCCESS, executed.c_str());
 }

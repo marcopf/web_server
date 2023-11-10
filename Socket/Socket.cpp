@@ -5,6 +5,26 @@ Socket::Socket()
 {
 }
 
+Socket	&Socket::operator=(const Socket &cpy)
+{
+	memcpy(this->pollfds, cpy.pollfds, sizeof(struct pollfd) * MAX_CONN);
+	this->requests = cpy.requests;
+	this->serverInfo = cpy.serverInfo;
+	this->envp = cpy.envp;
+	this->pollPos = cpy.pollPos;
+	this->clientSocket = cpy.clientSocket;
+	this->body = cpy.body;
+	this->clientAddrLen = cpy.clientAddrLen;
+	this->serverPoll = cpy.serverPoll;
+	this->clientAddr = cpy.clientAddr;
+	return *this;
+}
+
+Socket::Socket(const Socket &cpy)
+{
+	*this = cpy;
+}
+
 void	Socket::addPollFds(struct pollfd newPoll)
 {
 	if (this->pollPos < MAX_CONN)
@@ -12,8 +32,8 @@ void	Socket::addPollFds(struct pollfd newPoll)
 		this->pollfds[this->pollPos] = newPoll;
 		this->requests.insert(std::pair<int, std::string>(newPoll.fd, ""));
 		// this->rhMap.insert(std::pair<int, RequestHandler>(newPoll.fd, RequestHandler()));
+		this->pollPos++;
 	}
-	this->pollPos++;
 }
 
 void	Socket::removePollFds()
@@ -68,7 +88,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR, &portsOption, sizeof(portsOption[i]));
 		if (serverSocket == -1)
 		{
-			perror("Error socket init..");
+			std::cerr << RED << "Error socket init.." << END << std::endl;
 			return ;
 		}
 		serverAddr.sin_family = AF_INET;
@@ -76,13 +96,13 @@ Socket::Socket(ServerConf data, char **envp_main)
 		serverAddr.sin_addr.s_addr = ft_inet_addr(hostValue);
 		if (bind(serverSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr)) == -1)
 		{
-			perror("error binding socket...");
+			std::cerr << RED << "error binding socket..." << END << std::endl;
 			close(serverSocket);
 			return ;
 		}
 		if (listen(serverSocket, 5) == -1)
 		{
-			perror("error listening socket...");
+			std::cerr << RED << "error listening socket..." << END << std::endl;	
 			close(serverSocket);
 			return ;
 		}
@@ -90,7 +110,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		this->serverPoll.fd = serverSocket;
 		this->serverPoll.events = POLLIN;
 		addPollFds(this->serverPoll);
-		std::cout << "Listening  on " <<  hostValue  << ":" << this->serverInfo.getPorts()[i] << std::endl;
+		std::cout << GREEN << "Listening  on " <<  hostValue  << ":" << this->serverInfo.getPorts()[i] << END << std::endl;
 
 	}
 }
@@ -114,7 +134,6 @@ void	Socket::pollinFunc(int i)
 	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])) || 
 		(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !RequestHelper::getContentLenght(this->requests[this->pollfds[i].fd])))
 		this->pollfds[i].events = POLLOUT;
-		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	delete[] buffer;
 }
 
@@ -122,6 +141,7 @@ void	Socket::polloutFunc(int i)
 {
 	std::string response = RequestHelper::findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
 
+	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
@@ -130,7 +150,7 @@ void	Socket::polloutFunc(int i)
 void	Socket::checkFd(void)
 {
 	removePollFds();
-	int res = poll(this->pollfds, this->pollPos, 5);
+	int res = poll(this->pollfds, this->pollPos, 1);
 	// std::cout << "ho pollato" << std::endl;
 	if (res > 0)
 	{

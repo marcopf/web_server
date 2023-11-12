@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/wait.h>
+#include "../utils/utils.hpp"
 
 #define SUCCESS				"HTTP/1.1 200 OK"
 #define BAD_REQUEST			"HTTP/1.1 400 Bad Request"

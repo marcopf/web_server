@@ -1,5 +1,5 @@
-#include "../Socket/RequestHelper.hpp"
 #include "RequestHandler.hpp"
+
 ServerConf RequestHandler::getInfo() const
 {
     return (this->info);
@@ -72,7 +72,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
             crossRoads(matchedLocation);
     }
     else
-        this->response = RequestHelper::atachStatus(METHOD_NOT_ALLOWED, RequestHelper::fileToStr("./view/method_err.html").c_str());
+        this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/method_err.html").c_str());
 }
 
 std::string RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)

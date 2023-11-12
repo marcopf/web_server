@@ -17,6 +17,8 @@ std::string					General_parser::getFile(void) const
 	return (this->file);
 }
 
+General_parser::General_parser(){}
+
 bool	General_parser::lexer_brackets(void)
 {
 	int openings, closing, i = 0, j = 0;
@@ -84,34 +86,37 @@ bool	General_parser::lexer_eol(void)
 		counter++;
 		if (!space_check(data))
 		{
-			std::cerr << "Error(space): line " << counter << std::endl;
+			std::cerr << YELLOW << "Error(space): line " << counter << std::endl;
 			return (false);
 		}
 		if (!lineCheck(data))
 		{
-			std::cerr << "Error(line): line " << counter << std::endl;
+			std::cerr << YELLOW << "Error(line): line " << counter << std::endl;
 			return (false);			
 		}
 	}
 	return (true);
 }
 
-General_parser::General_parser(std::string path):path(path)
+General_parser::General_parser(std::string path, int printInfo):path(path)
 {
 	this->file = fileToStr(path);
 	if (!lexer_brackets() || !lexer_eol())
 	{
-		std::cerr << "Error: incorrect configuration file" << std::endl;
-		return ;
+		std::cerr << YELLOW << "ERROR IN CONFIGURATION FILE" << END << std::endl;
+		exit(3);
 	}
 	std::vector<std::string> server_list = getServers();
 	for (unsigned int i = 0; i < server_list.size(); i++)
 		this->servers.push_back(ServerConf(server_list[i]));
-	for (unsigned int i = 0; i < server_list.size(); i++)
+	if (printInfo)
 	{
-		servers[i].getInfo();
-		for (unsigned int j = 0; j < servers[i].locations_getter().size(); j++)
-			servers[i].locations_getter()[j].getInfo();
+		for (unsigned int i = 0; i < server_list.size(); i++)
+		{
+			servers[i].getInfo();
+			for (unsigned int j = 0; j < servers[i].locations_getter().size(); j++)
+				servers[i].locations_getter()[j].getInfo();
+		}
 	}
 }
 
@@ -126,6 +131,11 @@ std::string		General_parser::fileToStr(std::string path)
 	std::ifstream		f(path.c_str());
 	std::ostringstream	ss;
 
+	if (f.fail())
+	{
+		std::cerr << RED <<  "FILE DOES NOT EXIT!!" << END << std::endl;
+		exit(2);
+	}
 	ss << f.rdbuf();
 	str = ss.str();
 	f.close();

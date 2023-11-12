@@ -1,4 +1,3 @@
-#include "../Socket/RequestHelper.hpp"
 #include "RequestHandler.hpp"
 
 void    RequestHandler::getRequestHandler(int matchedLocation)
@@ -19,7 +18,7 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     else if (pos != std::string::npos && baseCgiPath != "null")
     {
         fileName = this->requestedUrl.substr(pos + 7);
-        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp, 0);
+        this->response = executeFile(baseCgiPath + fileName, this->envp, 0);
     }
     else if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
 		this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str());
@@ -77,7 +76,7 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
     if (pos != std::string::npos && baseCgiPath != "null")
     {
         std::string fileName = this->requestedUrl.substr(pos + 7);
-        this->response = RequestHelper::executeFile(baseCgiPath + fileName, this->envp, (char *)body.str().c_str());
+        this->response = executeFile(baseCgiPath + fileName, this->envp, (char *)body.str().c_str());
 		return ;
     }
 	getline(body, boundary, '\r');
@@ -117,13 +116,13 @@ void    RequestHandler::deleteRequestHandler(int matchedLocation)
 		if ("fileToDelete" == this->envp[i].substr(0, 12))
 		{
 			if (this->envp[i].substr(13).find("..") == std::string::npos &&  unlink((uploadDirectory + "/" + this->envp[i].substr(13)).c_str()) == -1)
-				this->response = RequestHelper::atachStatus(NOT_FOUND_DELETE, RequestHelper::fileToStr("./view/err.html").c_str());
+				this->response = atachStatus(NOT_FOUND_DELETE, fileToStr("./view/err.html").c_str());
 			else if (this->envp[i].substr(13).find("..") == std::string::npos)
-				this->response = RequestHelper::atachStatus(SUCCESS, RequestHelper::fileToStr("./view/welcome.html").c_str());
+				this->response = atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
 			else
-				this->response = RequestHelper::atachStatus(NOT_FOUND, RequestHelper::fileToStr("./view/err.html").c_str());
+				this->response = atachStatus(NOT_FOUND, fileToStr("./view/err.html").c_str());
 			return ;
 		}
 	}
-    this->response = RequestHelper::atachStatus(NOT_FOUND, RequestHelper::fileToStr("./view/err.html").c_str());
+    this->response = atachStatus(NOT_FOUND, fileToStr("./view/err.html").c_str());
 }

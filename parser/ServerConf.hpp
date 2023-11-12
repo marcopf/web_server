@@ -8,6 +8,12 @@
 #include <vector>
 #include "Location.hpp"
 
+#define RED "\x1b[1;31m"
+#define CYAN "\x1b[1;36m"
+#define GREEN "\x1b[1;32m"
+#define YELLOW "\x1b[1;33m"
+#define END "\x1b[1;0m"
+
 class ServerConf
 {
 private:

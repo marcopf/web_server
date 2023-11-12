@@ -1,7 +1,6 @@
-#include "RequestHelper.hpp"
+#include "utils.hpp"
 
-
-unsigned long	RequestHelper::getContentLenght(std::string header)
+unsigned long getContentLenght(std::string header)
 {
 	int	pos;
 	unsigned long	newLinePos;
@@ -18,7 +17,7 @@ unsigned long	RequestHelper::getContentLenght(std::string header)
 	return (len);
 }
 
-std::string RequestHelper::atachStatus(const char *status, const char *body)
+std::string atachStatus(const char *status, const char *body)
 {
 	std::stringstream ss;
 	std::string status_s = status, body_s = body;
@@ -27,7 +26,7 @@ std::string RequestHelper::atachStatus(const char *status, const char *body)
 	return (res);
 }
 
-std::string	RequestHelper::fileToStr(std::string file)
+std::string	fileToStr(std::string file)
 {
 	std::string str;
 	std::ifstream f(file.c_str());
@@ -38,7 +37,7 @@ std::string	RequestHelper::fileToStr(std::string file)
 	return (str);
 }
 
-std::string RequestHelper::findMethod(std::string req, ServerConf info, std::vector<std::string> envp)
+std::string findMethod(std::string req, ServerConf info, std::vector<std::string> envp)
 {
 	RequestHandler parser(info, req);
 
@@ -54,10 +53,10 @@ std::string RequestHelper::findMethod(std::string req, ServerConf info, std::vec
 	{
         return (parser.start("DELETE", findUrl(req), envp));
 	}
-	return (RequestHelper::atachStatus("HTTP/1.1 405 Method Not Allowed", RequestHelper::fileToStr("./view/method_err.html").c_str()));
+	return (atachStatus("HTTP/1.1 405 Method Not Allowed", fileToStr("./view/method_err.html").c_str()));
 }
 
-std::string RequestHelper::findUrl(std::string req)
+std::string findUrl(std::string req)
 {
 	unsigned long firstSpace;
 	unsigned long secondSpace;
@@ -68,12 +67,4 @@ std::string RequestHelper::findUrl(std::string req)
 	if (secondSpace != std::string::npos)
 		return (req.substr(firstSpace + 1, secondSpace - firstSpace - 1));
 	return ("NULL");
-}
-
-RequestHelper::RequestHelper(/* args */)
-{
-}
-
-RequestHelper::~RequestHelper()
-{
 }

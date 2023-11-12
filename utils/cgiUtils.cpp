@@ -1,4 +1,4 @@
-#include "../Socket/RequestHelper.hpp"
+#include "utils.hpp"
 
 char **createMat(std::string command, std::string path, char  *cgiParamater)
 {
@@ -87,7 +87,7 @@ std::string atachStatusCgi(const char *status, const char *body)
 	return (res);
 }
 
-std::string	RequestHelper::executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter)
+std::string	executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter)
 {
 	std::string		executed, result, command = extensionFinder(path);
 	int				fd[2], pid;
@@ -107,7 +107,7 @@ std::string	RequestHelper::executeFile(std::string path, std::vector<std::string
 	}
 	result = waitAndCheck(pid, fd);
 	if (result != "OK")
-		return RequestHelper::atachStatus(NOT_FOUND, result.c_str());
+		return atachStatus(NOT_FOUND, result.c_str());
 	while (read(fd[0], &c, 1))
 		executed += c;
 	std::cout << "XXXXXXXXXX" <<  executed << "XXXXXXX" << std::endl;

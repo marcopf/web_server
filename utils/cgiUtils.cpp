@@ -110,7 +110,6 @@ std::string	executeFile(std::string path, std::vector<std::string> envp, char *c
 		return atachStatus(NOT_FOUND, result.c_str());
 	while (read(fd[0], &c, 1))
 		executed += c;
-	std::cout << "XXXXXXXXXX" <<  executed << "XXXXXXX" << std::endl;
 	close(fd[0]);
 	return atachStatusCgi(SUCCESS, executed.c_str());
 }

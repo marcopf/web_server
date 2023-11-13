@@ -132,21 +132,21 @@ void	Socket::pollinFunc(int i)
 	delete[] buffer;
 }
 
-void	Socket::polloutFunc(int i)
+void	Socket::polloutFunc(int i, int debug)
 {
 	std::string response = findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
 
-	std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+	if (debug)
+		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
 
 
-void	Socket::checkFd(void)
+void	Socket::checkFd(int debug)
 {
 	removePollFds();
 	int res = poll(this->pollfds, this->pollPos, 1);
-	// std::cout << "ho pollato" << std::endl;
 	if (res > 0)
 	{
 		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)
@@ -169,7 +169,7 @@ void	Socket::checkFd(void)
 			if (this->pollfds[i].revents == POLLIN)
 				this->pollinFunc(i);
 			else if (this->pollfds[i].revents == POLLOUT)
-				this->polloutFunc(i);
+				this->polloutFunc(i, debug);
 		}
 	}
 }

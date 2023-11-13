@@ -18,7 +18,7 @@
 #include "../parser/ServerConf.hpp"
 #include "../utils/utils.hpp"
 
-#define	MAX_CONN 200
+#define	MAX_CONN 300
 #define RED "\x1b[1;31m"
 #define CYAN "\x1b[1;36m"
 #define GREEN "\x1b[1;32m"
@@ -39,11 +39,11 @@ private:
 	struct pollfd 					serverPoll;
 	struct sockaddr_in				clientAddr;
 public:
-	void                            polloutFunc(int i);
+	void                            polloutFunc(int i, int debug);
 	void                            pollinFunc(int i);
 	void							addPollFds(struct pollfd newPoll);
 	void							removePollFds();
-	void                            checkFd(void);
+	void                            checkFd(int debug);
 	Socket &operator=(const Socket   &cpy);
 	Socket(const Socket &cpy);
 	Socket(void);

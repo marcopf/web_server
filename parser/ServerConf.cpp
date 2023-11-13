@@ -155,7 +155,7 @@ void	appendhost(std::string str)
 
 	if (!file.is_open())
 	{
-		std::cerr << YELLOW << "cannot open /etc/hosts check permission..." << std::endl;
+		std::cerr << YELLOW << "cannot open /etc/hosts try again with" << RED << " SUDO" << YELLOW << "..." << std::endl;
 		return ;
 	}
 	while (getline(inp_file, data, '\n'))

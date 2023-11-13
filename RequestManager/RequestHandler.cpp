@@ -65,6 +65,11 @@ void RequestHandler::requestFilter(long int matchedLocation)
     {
         if (redirectUrl != "null")
             this->response = REDIRECT + redirectUrl + "\r\n\r\n";
+        else if (this->info.getMethod().find(this->method) == std::string::npos)
+        {
+            this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/displayError/method_err.html").c_str());
+            return ;
+        }            
         else if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
             || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getAutoind() == "true" && this->info.locations_getter()[matchedLocation].getMethod().find("GET") != std::string::npos))
             this->response = callForAutoindex(matchedLocation);
@@ -72,7 +77,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
             crossRoads(matchedLocation);
     }
     else
-        this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/method_err.html").c_str());
+        this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/displayError/method_err.html").c_str());
 }
 
 std::string RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)

@@ -53,7 +53,7 @@ std::string findMethod(std::string req, ServerConf info, std::vector<std::string
 	{
         return (parser.start("DELETE", findUrl(req), envp));
 	}
-	return (atachStatus("HTTP/1.1 405 Method Not Allowed", fileToStr("./view/method_err.html").c_str()));
+	return (atachStatus("HTTP/1.1 405 Method Not Allowed", fileToStr("./view/displayError/method_err.html").c_str()));
 }
 
 std::string findUrl(std::string req)

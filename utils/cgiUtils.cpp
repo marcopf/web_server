@@ -74,7 +74,7 @@ std::string	waitAndCheck(int pid, int *fd)
 	}
 	close(fd[1]);
 	if (flag || (WIFEXITED(stat) && WEXITSTATUS(stat)))
-		return (close(fd[0]), fileToStr("./view/cgi_error.html"));
+		return (close(fd[0]), fileToStr("./view/displayError/cgi_error.html"));
 	return ("OK");
 }
 

@@ -116,13 +116,13 @@ void    RequestHandler::deleteRequestHandler(int matchedLocation)
 		if ("fileToDelete" == this->envp[i].substr(0, 12))
 		{
 			if (this->envp[i].substr(13).find("..") == std::string::npos &&  unlink((uploadDirectory + "/" + this->envp[i].substr(13)).c_str()) == -1)
-				this->response = atachStatus(NOT_FOUND_DELETE, fileToStr("./view/err.html").c_str());
+				this->response = atachStatus(NOT_FOUND_DELETE, fileToStr("./view/displayError/err.html").c_str());
 			else if (this->envp[i].substr(13).find("..") == std::string::npos)
 				this->response = atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
 			else
-				this->response = atachStatus(NOT_FOUND, fileToStr("./view/err.html").c_str());
+				this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str());
 			return ;
 		}
 	}
-    this->response = atachStatus(NOT_FOUND, fileToStr("./view/err.html").c_str());
+    this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str());
 }

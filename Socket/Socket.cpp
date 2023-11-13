@@ -86,7 +86,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		if (serverSocket == -1)
 		{
 			std::cerr << RED << "Error socket init.." << END << std::endl;
-			return ;
+			exit(1);
 		}
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(this->serverInfo.getPorts()[i]);
@@ -101,7 +101,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		{
 			std::cerr << RED << "error listening socket..." << END << std::endl;	
 			close(serverSocket);
-			return ;
+			exit(1);
 		}
 		memset(&this->serverPoll, 0, sizeof(this->serverPoll));
 		this->serverPoll.fd = serverSocket;
@@ -149,7 +149,8 @@ void	Socket::polloutFunc(int i, int debug)
 {
 	if (this->maxBodySizeExeeded)
 	{
-		std::string response = atachStatus("HTTP/1.1 413 Request Entity Too Large", fileToStr("./view/err.html").c_str());
+		std::string response = atachStatus("HTTP/1.1 413 Request Entity Too Large", fileToStr("./view/displayError/err.html").c_str());
+		
 		send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 		return ;
 	}

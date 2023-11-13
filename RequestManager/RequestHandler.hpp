@@ -24,9 +24,9 @@
 #define	HTML				"text/html"
 #define	PLAIN				"text/plain"
 
-#define	ERR_PAGE			"./view/err.html"
-#define ERR_METHOD			"./view/method_err.html"
-#define	ERR_AUTOINDEX		"./view/autoindex_err.html"
+#define	ERR_PAGE			"./view/displayError/err.html"
+#define ERR_METHOD			"./view/displayError/method_err.html"
+#define	ERR_AUTOINDEX		"./view/displayError/autoindex_err.html"
 #define WELCOME				"./view/welcome.html"
 
 #define CGI_TOKEN           "cgi-bin"

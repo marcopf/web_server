@@ -12,6 +12,7 @@ Socket	&Socket::operator=(const Socket &cpy)
 	this->clientAddrLen = cpy.clientAddrLen;
 	this->serverPoll = cpy.serverPoll;
 	this->clientAddr = cpy.clientAddr;
+	this->maxBodySizeExeeded = cpy.maxBodySizeExeeded;
 	return *this;
 }
 
@@ -70,6 +71,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 	memset(this->pollfds, 0, sizeof(struct pollfd) * MAX_CONN);
 	while (envp_main[++i])
 		this->envp.push_back(envp_main[i]);
+	this->maxBodySizeExeeded = 0;
 	this->pollPos = 0;
 	this->body = "";
 	this->serverInfo = data;
@@ -122,10 +124,21 @@ void	Socket::pollinFunc(int i)
     recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
 	this->requests[this->pollfds[i].fd] += buffer;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
-		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs()	)
+		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs())
+	{
 		toRead = getContentLenght(this->requests[this->pollfds[i].fd]);
+	}
 	else
 		toRead = 1000;
+	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && getContentLenght(this->requests[this->pollfds[i].fd]) > (unsigned long)this->serverInfo.getIntMbs())
+	{
+		this->maxBodySizeExeeded = 1;
+		delete [] buffer;
+		this->pollfds[i].events = POLLOUT;
+		return ;
+	}
+	else
+		this->maxBodySizeExeeded = 0;
 	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == getContentLenght(this->requests[this->pollfds[i].fd])) || 
 		(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !getContentLenght(this->requests[this->pollfds[i].fd])))
 		this->pollfds[i].events = POLLOUT;
@@ -134,6 +147,12 @@ void	Socket::pollinFunc(int i)
 
 void	Socket::polloutFunc(int i, int debug)
 {
+	if (this->maxBodySizeExeeded)
+	{
+		std::string response = atachStatus("HTTP/1.1 413 Request Entity Too Large", fileToStr("./view/err.html").c_str());
+		send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
+		return ;
+	}
 	std::string response = findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
 
 	if (debug)

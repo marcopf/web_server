@@ -36,6 +36,7 @@ private:
 	socklen_t						clientAddrLen;
 	int								pollPos;
 	int								clientSocket;
+	int								maxBodySizeExeeded;
 	struct pollfd 					serverPoll;
 	struct sockaddr_in				clientAddr;
 public:

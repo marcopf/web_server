@@ -121,7 +121,11 @@ void	Socket::pollinFunc(int i)
 		this->pollfds[i].events = POLLOUT;
 	buffer = new char[toRead + 1];
 	memset(buffer, 0, toRead + 1);
-    recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
+    int ret = recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
+	if (ret == -1)
+		std::cerr << RED << "Error Happen " << END << std::endl;
+	if (ret == 0)
+		std::cout << YELLOW << "Nothing to read" << END << std::endl;
 	this->requests[this->pollfds[i].fd] += buffer;
 	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
 		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs())

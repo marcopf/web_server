@@ -65,7 +65,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
     {
         if (redirectUrl != "null")
             this->response = REDIRECT + redirectUrl + "\r\n\r\n";
-        else if (this->info.getMethod().find(this->method) == std::string::npos)
+        else if (matchedLocation == -1 && this->info.getMethod().find(this->method) == std::string::npos)
         {
             this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/displayError/method_err.html").c_str());
             return ;
@@ -98,6 +98,15 @@ std::string RequestHandler::start(std::string method, std::string requestedUrl, 
 				matchedLocation = (long int)i;
 				size = locations[i].getUrl().length();
 		}
+    }
+    std::string comp = requestedUrl.find("?") != std::string::npos ? requestedUrl.substr(0, requestedUrl.find("?")) : requestedUrl;
+    if (matchedLocation == -1 && comp != "/")
+    {
+        std::cout << this->info.getErrPage() << std::endl;
+        if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
+            return (this->response = atachStatus(NOT_FOUND, fileToStr(this->info.getErrPage().c_str()).c_str()));
+        else
+            return (this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str()));
     }
     this->requestFilter(matchedLocation);
     return (this->response);

@@ -5,6 +5,6 @@
 </head>
 <body>
     <h1>Ora Corrente</h1>
-    <p>L'orario attuale e': <?php echo dathdgshsee('H:i:s'); ?></p>
+    <p>L'orario attuale e': <?php echo date('H:i:s'); ?></p>
 </body>
 </html>

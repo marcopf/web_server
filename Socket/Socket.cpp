@@ -3,7 +3,6 @@
 Socket	&Socket::operator=(const Socket &cpy)
 {
 	memcpy(this->pollfds, cpy.pollfds, sizeof(struct pollfd) * MAX_CONN);
-	this->requests = cpy.requests;
 	this->serverInfo = cpy.serverInfo;
 	this->envp = cpy.envp;
 	this->pollPos = cpy.pollPos;
@@ -28,8 +27,6 @@ void	Socket::addPollFds(struct pollfd newPoll)
 		this->pollfds[this->pollPos] = newPoll;
 		Connection *toAdd = new Connection(&this->pollfds[this->pollPos]);
 		this->connections.insert(std::pair<int, Connection *>(newPoll.fd, toAdd));
-		this->requests.insert(std::pair<int, std::string>(newPoll.fd, ""));
-		// this->rhMap.insert(std::pair<int, RequestHandler>(newPoll.fd, RequestHandler()));
 		this->pollPos++;
 	}
 }
@@ -40,13 +37,11 @@ void	Socket::removePollFds()
 	{
 		if (this->pollfds[i].revents == POLLERR)
 		{
-			this->requests.erase(this->pollfds[i].fd);
 			delete this->connections[this->pollfds[i].fd];
 			this->connections.erase(this->pollfds[i].fd);
 			close(this->pollfds[i].fd);
 			for (int j = i; j < this->pollPos; j++)
 				this->pollfds[j] = this->pollfds[j + 1];
-			// this->rhMap.erase(this->pollfds[i].fd);
 			this->pollPos--;
 		}
 	}
@@ -112,7 +107,6 @@ Socket::Socket(ServerConf data, char **envp_main)
 		this->serverPoll.events = POLLIN;
 		addPollFds(this->serverPoll);
 		std::cout << GREEN << "Listening  on " << YELLOW <<  hostValue  << END <<  ":" << CYAN << this->serverInfo.getPorts()[i] << END << std::endl;
-
 	}
 }
 
@@ -125,10 +119,9 @@ void	Socket::polloutFunc(int i, int debug)
 		send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 		return ;
 	}
-	this->requests[this->pollfds[i].fd] = this->connections[this->pollfds[i].fd]->getHeader();
 	std::string response = findMethod(this->connections[this->pollfds[i].fd], this->serverInfo, this->envp);
 	if (debug)
-		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
+		std::cout << this->connections[this->pollfds[i].fd]->getHeader() << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
@@ -158,7 +151,7 @@ void	Socket::checkFd(int debug)
 		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
 		{
 			if (this->pollfds[i].revents == POLLIN)
-				this->connections[this->pollfds[i].fd]->read();
+				this->connections[this->pollfds[i].fd]->read(this->maxBodySizeExeeded, this->serverInfo.getIntMbs());
 			else if (this->pollfds[i].revents == POLLOUT)
 				this->polloutFunc(i, debug);
 		}

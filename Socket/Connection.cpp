@@ -48,14 +48,18 @@ void    Connection::addToBuffer(const char *toAdd)
     this->buffer = newBuffer;
 }
 
-int     Connection::handleBody()
+int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
 {
     unsigned long   byteAlreadyRead = this->oldBufferLen + this->newBufferLen;
 
     if (this->headerSize > 0)
     {
         this->bodySize = getBodyLenght(this->header);
-        
+        if (this->bodySize > (unsigned long)maxBodySize)
+        {
+            maxBodySizeExeeded = 1;
+            return (1);
+        }
         if (this->bodySize > 0 && (this->headerSize + this->bodySize) <= byteAlreadyRead)
         {
             this->body = new char [this->bodySize];
@@ -71,13 +75,13 @@ int     Connection::handleBody()
     return 0;
 }
 
-void    Connection::read()
+void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
 {
     static unsigned long    toRead = 3000;
     char                    *tempBuffer;
     int                     recvRet = 0;
 
-    if (this->handleBody())
+    if (this->handleBody(maxBodySizeExeeded, maxBodySize))
     {
         this->pollfd->events = POLLOUT;
         return ;
@@ -93,7 +97,7 @@ void    Connection::read()
     {
         this->headerSize = headerLen(this->buffer, "\r\n\r\n", this->oldBufferLen + this->newBufferLen);
         this->header = std::string(this->buffer, this->headerSize + 2);
-        if (this->handleBody())
+        if (this->handleBody(maxBodySizeExeeded, maxBodySize))
         {
             this->pollfd->events = POLLOUT;
             return ;

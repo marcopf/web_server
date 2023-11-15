@@ -31,7 +31,6 @@ class Socket
 private:
 	struct pollfd					pollfds[MAX_CONN];
 	std::map<int, Connection *>		connections;
-	std::map<int, std::string>      requests;
 	std::vector<std::string>		envp;
 	ServerConf						serverInfo;
 	std::string						body;

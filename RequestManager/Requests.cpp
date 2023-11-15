@@ -103,9 +103,11 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	else
 		path = fileName.c_str();
 	std::ofstream	newFile(path.c_str(), std::ios::binary);
-	newFile.write(cpy + 1, fileSize - 1);
+	if (cpy[0] == 10 || cpy[0] == 13)
+		newFile.write(cpy + 1, fileSize - 1);
+	else
+		newFile.write(cpy, fileSize);
 	newFile.close();
-	std::cout << cpy[0] << std::endl;
 	this->response =  atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
 }
 

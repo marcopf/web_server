@@ -34,9 +34,9 @@ public:
     unsigned long   getBodySize(void);
     std::string     getHeader(void);
     char            *getBody(void);
-    void            read(void);
+    void            read(int &maxBodySizeExeeded, int maxBodySize);
     void            addToBuffer(const char *toAdd);
-    int             handleBody();
+    int             handleBody(int &maxBodySizeExeeded, int maxBodySize);
     Connection(const Connection &cpy);
     Connection &operator=(const Connection &cpy);
     Connection(struct pollfd *pollfd);

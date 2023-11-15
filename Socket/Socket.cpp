@@ -26,6 +26,8 @@ void	Socket::addPollFds(struct pollfd newPoll)
 	if (this->pollPos < MAX_CONN)
 	{
 		this->pollfds[this->pollPos] = newPoll;
+		Connection *toAdd = new Connection(&this->pollfds[this->pollPos]);
+		this->connections.insert(std::pair<int, Connection *>(newPoll.fd, toAdd));
 		this->requests.insert(std::pair<int, std::string>(newPoll.fd, ""));
 		// this->rhMap.insert(std::pair<int, RequestHandler>(newPoll.fd, RequestHandler()));
 		this->pollPos++;
@@ -39,6 +41,8 @@ void	Socket::removePollFds()
 		if (this->pollfds[i].revents == POLLERR)
 		{
 			this->requests.erase(this->pollfds[i].fd);
+			delete this->connections[this->pollfds[i].fd];
+			this->connections.erase(this->pollfds[i].fd);
 			close(this->pollfds[i].fd);
 			for (int j = i; j < this->pollPos; j++)
 				this->pollfds[j] = this->pollfds[j + 1];
@@ -114,39 +118,37 @@ Socket::Socket(ServerConf data, char **envp_main)
 
 void	Socket::pollinFunc(int i)
 {
-	char					*buffer;
-	static unsigned long	toRead = 1000;
-
-	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !getContentLenght(this->requests[this->pollfds[i].fd])))
-		this->pollfds[i].events = POLLOUT;
-	buffer = new char[toRead + 1];
-	memset(buffer, 0, toRead + 1);
-    int ret = recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
-	if (ret == -1)
-		std::cerr << RED << "Error Happen " << END << std::endl;
-	if (ret == 0)
-		std::cout << YELLOW << "Nothing to read" << END << std::endl;
-	this->requests[this->pollfds[i].fd] += buffer;
-	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
-		&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs())
-	{
-		toRead = getContentLenght(this->requests[this->pollfds[i].fd]);
-	}
-	else
-		toRead = 1000;
-	if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && getContentLenght(this->requests[this->pollfds[i].fd]) > (unsigned long)this->serverInfo.getIntMbs())
-	{
-		this->maxBodySizeExeeded = 1;
-		delete [] buffer;
-		this->pollfds[i].events = POLLOUT;
-		return ;
-	}
-	else
-		this->maxBodySizeExeeded = 0;
-	if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == getContentLenght(this->requests[this->pollfds[i].fd])) || 
-		(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !getContentLenght(this->requests[this->pollfds[i].fd])))
-		this->pollfds[i].events = POLLOUT;
-	delete[] buffer;
+	this->connections[this->pollfds[i].fd]->read();
+	// if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !getContentLenght(this->requests[this->pollfds[i].fd])))
+	// 	this->pollfds[i].events = POLLOUT;
+	// buffer = new char[toRead + 1];
+	// memset(buffer, 0, toRead + 1);
+    // int ret = recv(this->pollfds[i].fd, buffer, toRead, MSG_DONTWAIT);
+	// if (ret == -1)
+	// 	std::cerr << RED << "Error Happen " << END << std::endl;
+	// if (ret == 0)
+	// 	std::cout << YELLOW << "Nothing to read" << END << std::endl;
+	// this->requests[this->pollfds[i].fd] += buffer;
+	// if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n")
+	// 	&& getContentLenght(this->requests[this->pollfds[i].fd]) <= (unsigned long)this->serverInfo.getIntMbs())
+	// {
+	// 	toRead = getContentLenght(this->requests[this->pollfds[i].fd]);
+	// }
+	// else
+	// 	toRead = 1000;
+	// if (strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && getContentLenght(this->requests[this->pollfds[i].fd]) > (unsigned long)this->serverInfo.getIntMbs())
+	// {
+	// 	this->maxBodySizeExeeded = 1;
+	// 	delete [] buffer;
+	// 	this->pollfds[i].events = POLLOUT;
+	// 	return ;
+	// }
+	// else
+	// 	this->maxBodySizeExeeded = 0;
+	// if ((strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && this->requests[this->pollfds[i].fd].substr(this->requests[this->pollfds[i].fd].find("\r\n\r\n") + 4).length() == getContentLenght(this->requests[this->pollfds[i].fd])) || 
+	// 	(strstr(this->requests[this->pollfds[i].fd].c_str(), "\r\n\r\n") && !getContentLenght(this->requests[this->pollfds[i].fd])))
+	// 	this->pollfds[i].events = POLLOUT;
+	// delete[] buffer;
 }
 
 void	Socket::polloutFunc(int i, int debug)
@@ -158,8 +160,9 @@ void	Socket::polloutFunc(int i, int debug)
 		send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
 		return ;
 	}
+	this->requests[this->pollfds[i].fd] = this->connections[this->pollfds[i].fd]->getHeader();
+	std::cout << this->requests[this->pollfds[i].fd]<< std::endl;
 	std::string response = findMethod(this->requests[this->pollfds[i].fd], this->serverInfo, this->envp);
-
 	if (debug)
 		std::cout << this->requests[this->pollfds[i].fd] << std::endl;
 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
@@ -191,7 +194,7 @@ void	Socket::checkFd(int debug)
 		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
 		{
 			if (this->pollfds[i].revents == POLLIN)
-				this->pollinFunc(i);
+				this->connections[this->pollfds[i].fd]->read();
 			else if (this->pollfds[i].revents == POLLOUT)
 				this->polloutFunc(i, debug);
 		}
@@ -204,4 +207,8 @@ Socket::Socket()
 
 Socket::~Socket()
 {
+	for (int i = 0; i < this->pollPos; i++)
+	{
+		delete this->connections[this->pollfds[i].fd];
+	}
 }

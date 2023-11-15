@@ -17,6 +17,7 @@
 #include <map>
 #include "../parser/ServerConf.hpp"
 #include "../utils/utils.hpp"
+#include "Connection.hpp"
 
 #define	MAX_CONN 300
 #define RED "\x1b[1;31m"
@@ -29,6 +30,7 @@ class Socket
 {
 private:
 	struct pollfd					pollfds[MAX_CONN];
+	std::map<int, Connection *>		connections;
 	std::map<int, std::string>      requests;
 	std::vector<std::string>		envp;
 	ServerConf						serverInfo;

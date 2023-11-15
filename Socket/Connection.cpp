@@ -4,61 +4,13 @@ std::string Connection::getHeader(void)
 {
     return (this->header);
 }
-std::string Connection::getBody(void)
+char    *Connection::getBody(void)
 {
-    return ("\r\n\r\n" + std::string(this->body));
+    return (this->body);
 }
-
-char	*ft_strnstr(const char *haystack, const char *needle, size_t len)
+unsigned long Connection::getBodySize(void)
 {
-	size_t		i;
-	size_t		j;
-
-	i = 0;
-	if (*needle == '\0' || needle == NULL)
-		return ((char *) haystack);
-	if (!haystack && len == 0)
-		return (0);
-	while (i < len)
-	{
-		j = 0;
-		while (needle[j] == haystack[i + j] && i + j < len)
-		{
-			if (needle[j + 1] == '\0')
-			{
-				return ((char *)haystack + i);
-			}
-			j++;
-		}
-		i++;
-	}
-	return (NULL);
-}
-
-unsigned long headerLen(const char *haystack, const char *needle, size_t len)
-{
-	size_t		i;
-	size_t		j;
-
-	i = 0;
-	if (*needle == '\0' || needle == NULL)
-		return (0);
-	if (!haystack && len == 0)
-		return (0);
-	while (i < len)
-	{
-		j = 0;
-		while (needle[j] == haystack[i + j] && i + j < len)
-		{
-			if (needle[j + 1] == '\0')
-			{
-				return (i);
-			}
-			j++;
-		}
-		i++;
-	}
-	return (0);
+    return (this->bodySize);
 }
 
 unsigned long getBodyLenght(std::string header)
@@ -128,7 +80,6 @@ void    Connection::read()
     if (this->handleBody())
     {
         this->pollfd->events = POLLOUT;
-        std::cout << this->buffer << std::endl;
         return ;
     }
     tempBuffer = new char [toRead];
@@ -156,6 +107,11 @@ Connection &Connection::operator=(const Connection &cpy)
     this->newBufferLen = cpy.newBufferLen;
     this->oldBufferLen = cpy.oldBufferLen;
     this->pollfd = cpy.pollfd;
+    this->body = cpy.body;
+    this->headerSize = cpy.headerSize;
+    this->bodySize = cpy.bodySize;
+    this->header = cpy.header;
+    this->fd = cpy.fd;
     return (*this);
 }
 

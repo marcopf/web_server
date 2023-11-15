@@ -2,6 +2,7 @@
 #define REQUESTHANDLER_HPP
 
 #include "../parser/ServerConf.hpp"
+#include "../Socket/Connection.hpp"
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -31,6 +32,8 @@
 
 #define CGI_TOKEN           "cgi-bin"
 
+class Connection;
+
 class RequestHandler
 {
 private:
@@ -40,6 +43,7 @@ private:
     std::string                 requestedUrl;
     std::string                 response;
     std::vector<std::string>    envp;
+    Connection                  *req;
 public:
     std::string                 getReq() const;
     std::string                 getRes() const;
@@ -62,7 +66,7 @@ public:
     std::string                 autoindex(std::string directoryPath, int i);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);
-    RequestHandler(ServerConf info, std::string req);
+    RequestHandler(ServerConf info, Connection *req);
     ~RequestHandler();
 };
 

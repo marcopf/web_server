@@ -8,6 +8,7 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     std::string		completePath = getSearchPath(matchedLocation);
 
     addNewEnvp();
+	std::cout << "search: " << completePath << std::endl;
     if (matchedLocation == -1 && this->requestedUrl == "/")
 	{
 		if (this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
@@ -35,9 +36,60 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
 		this->response = atachStatus(NOT_FOUND, fileToStr(ERR_PAGE).c_str());
 }
 
-void	RequestHandler::createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret)
+int	getBodyInfo(char *body, int len)
 {
-	std::string toAdd, path;
+	int i;
+	int	counter = 0;
+
+	i = 0;
+	while (i < len)
+	{
+		if (body[i] == '\n')
+			counter++;
+		if (counter == 3)
+			break ;
+		i++;
+	}
+	return (i + 2);
+}
+
+std::string	findFileName(std::string bodyInfo)
+{
+	std::string	fileName;
+	unsigned long start = bodyInfo.find("filename=\"") + 10;
+	unsigned long end;
+
+	if (start != std::string::npos)
+	{
+		end = bodyInfo.find("\"", start);
+		fileName = bodyInfo.substr(start, end - start);
+	}
+	return (fileName);
+}
+
+void    RequestHandler::postRequestHandler(int matchedLocation)
+{
+	if (!this->req->getBody())
+	{
+		this->response =  atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
+		return ;
+	}
+	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
+	std::string 	bodyInfo = std::string(this->req->getBody(), bodyOffeset);
+	std::string		boundary = bodyInfo.substr(0, bodyInfo.find("\r\n"));
+	std::string		fileName = findFileName(bodyInfo);
+	unsigned long	fileSize = headerLen(this->req->getBody() + bodyOffeset, (boundary + "--").c_str(), this->req->getBodySize() - bodyOffeset) - 2;
+	char			*cpy = this->req->getBody() + bodyOffeset;
+	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
+	unsigned long	pos = this->requestedUrl.find("cgi-bin");
+	std::string		toAdd, path;
+
+	addNewEnvp();
+    if (pos != std::string::npos && baseCgiPath != "null")
+    {
+        this->response = executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
+		return ;
+    }
 
 	if (matchedLocation == -1)
 		toAdd = this->info.getPath();
@@ -45,64 +97,16 @@ void	RequestHandler::createFile(std::stringstream &filename, int matchedLocation
 		toAdd = this->info.locations_getter()[matchedLocation].getPath();
 	if (toAdd != "" && toAdd != "null")
 	{
-		path = toAdd + "/" + filename.str().c_str();
+		path = toAdd + "/" + fileName.c_str();
 		mkdir(toAdd.c_str(), 0777);
 	}
 	else
-		path = filename.str().c_str();
-	std::ofstream newFile(path.c_str());
-	newFile << ret;
+		path = fileName.c_str();
+	std::ofstream	newFile(path.c_str(), std::ios::binary);
+	newFile.write(cpy + 1, fileSize - 1);
 	newFile.close();
-	counter = 1;
-	ret = "";
-	filename.str("");
-	isFile = 2;
-}
-
-void    RequestHandler::postRequestHandler(int matchedLocation)
-{
-	static int			newFileName;
-	int					isFile = 2;
-	int					counter = 1;
-	std::stringstream	body(this->request.substr(this->request.find("\r\n\r\n") + 4));
-	std::stringstream	ss;
-	std::string 		ret;
-	std::string 		line;
-	std::string 		boundary;
-	unsigned long		pos = this->requestedUrl.find("cgi-bin");
-	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
-
-	addNewEnvp();
-    if (pos != std::string::npos && baseCgiPath != "null")
-    {
-        std::string fileName = this->requestedUrl.substr(pos + 7);
-        this->response = executeFile(baseCgiPath + fileName, this->envp, (char *)body.str().c_str());
-		return ;
-    }
-	getline(body, boundary, '\r');
-	while (getline(body, line, '\r'))
-	{
-		if (line.find(boundary) != std::string::npos)
-			createFile(ss, matchedLocation, isFile, counter, ret);
-		if (line.find("Content-Disposition: form-data;") != std::string::npos)
-		{
-			if (line.find("filename=\"") == std::string::npos)
-				ss << "postFile(" << newFileName << ")";
-			unsigned long start = line.find("filename=\"") + 10;
-			if (start - 10 != std::string::npos)
-			{
-				isFile = 3;
-				unsigned long end = line.find("\"", start + 1);
-				ss << line.substr(start, end - start);
-			}
-			newFileName++;
-		}
-		if (counter > isFile)	
-			ret += line == "\n" ? "" : line;
-		counter++;
-	}
-	this->response =  atachStatus(SUCCESS, ret.c_str());
-	return ;
+	std::cout << cpy[0] << std::endl;
+	this->response =  atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)

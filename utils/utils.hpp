@@ -20,12 +20,16 @@
 //#define PHP				"/opt/homebrew/bin/php" //MACOS
 
 #include "../RequestManager/RequestHandler.hpp"
+#include "../Socket/Connection.hpp"
+class Connection;
 
 unsigned long	getContentLenght(std::string header);
 std::string		atachStatus(const char *status, const char *body);
 std::string		fileToStr(std::string file);
-std::string		findMethod(std::string req, ServerConf info, std::vector<std::string> envp);
+std::string		findMethod(Connection *req, ServerConf info, std::vector<std::string> envp);
 std::string		findUrl(std::string req);
+char	        *ft_strnstr(const char *haystack, const char *needle, size_t len);
+unsigned long   headerLen(const char *haystack, const char *needle, size_t len);
 
 //CGI UTILS
 char			**createMat(std::string command, std::string path, char  *cgiParamater);

@@ -14,6 +14,7 @@ static int keepRunning = 42;
 
 void stop(int dummy)
 {
+	(void)dummy;
 	keepRunning = 0;
 }
 

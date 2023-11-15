@@ -31,11 +31,12 @@ private:
     char            *body;
     struct pollfd   *pollfd;
 public:
-    std::string getHeader(void);
-    std::string getBody(void);
-    void        read(void);
-    void        addToBuffer(const char *toAdd);
-    int         handleBody();
+    unsigned long   getBodySize(void);
+    std::string     getHeader(void);
+    char            *getBody(void);
+    void            read(void);
+    void            addToBuffer(const char *toAdd);
+    int             handleBody();
     Connection(const Connection &cpy);
     Connection &operator=(const Connection &cpy);
     Connection(struct pollfd *pollfd);

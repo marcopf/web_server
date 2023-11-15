@@ -17,6 +17,58 @@ unsigned long getContentLenght(std::string header)
 	return (len);
 }
 
+char	*ft_strnstr(const char *haystack, const char *needle, size_t len)
+{
+	size_t		i;
+	size_t		j;
+
+	i = 0;
+	if (*needle == '\0' || needle == NULL)
+		return ((char *) haystack);
+	if (!haystack && len == 0)
+		return (0);
+	while (i < len)
+	{
+		j = 0;
+		while (needle[j] == haystack[i + j] && i + j < len)
+		{
+			if (needle[j + 1] == '\0')
+			{
+				return ((char *)haystack + i);
+			}
+			j++;
+		}
+		i++;
+	}
+	return (NULL);
+}
+
+unsigned long headerLen(const char *haystack, const char *needle, size_t len)
+{
+	size_t		i;
+	size_t		j;
+
+	i = 0;
+	if (*needle == '\0' || needle == NULL)
+		return (0);
+	if (!haystack && len == 0)
+		return (0);
+	while (i < len)
+	{
+		j = 0;
+		while (needle[j] == haystack[i + j] && i + j < len)
+		{
+			if (needle[j + 1] == '\0')
+			{
+				return (i);
+			}
+			j++;
+		}
+		i++;
+	}
+	return (0);
+}
+
 std::string atachStatus(const char *status, const char *body)
 {
 	std::stringstream ss;
@@ -37,21 +89,21 @@ std::string	fileToStr(std::string file)
 	return (str);
 }
 
-std::string findMethod(std::string req, ServerConf info, std::vector<std::string> envp)
+std::string findMethod(Connection *req, ServerConf info, std::vector<std::string> envp)
 {
 	RequestHandler parser(info, req);
 
-    if (req.substr(0, 3) == "GET")
+    if (req->getHeader().substr(0, 3) == "GET")
 	{
-        return (parser.start("GET", findUrl(req), envp));
+        return (parser.start("GET", findUrl(req->getHeader()), envp));
 	}
-    else if (req.substr(0, 4) == "POST")
+    else if (req->getHeader().substr(0, 4) == "POST")
     {
-		return (parser.start("POST", findUrl(req), envp));
+		return (parser.start("POST", findUrl(req->getHeader()), envp));
 	}
-    else if (req.substr(0, 6) == "DELETE")
+    else if (req->getHeader().substr(0, 6) == "DELETE")
 	{
-        return (parser.start("DELETE", findUrl(req), envp));
+        return (parser.start("DELETE", findUrl(req->getHeader()), envp));
 	}
 	return (atachStatus("HTTP/1.1 405 Method Not Allowed", fileToStr("./view/displayError/method_err.html").c_str()));
 }

@@ -99,11 +99,23 @@ std::string RequestHandler::start(std::string method, std::string requestedUrl, 
 				size = locations[i].getUrl().length();
 		}
     }
+    std::string		completePath = getSearchPath(matchedLocation);
     std::string comp = requestedUrl.find("?") != std::string::npos ? requestedUrl.substr(0, requestedUrl.find("?")) : requestedUrl;
     if (matchedLocation == -1 && comp != "/")
     {
-        std::cout << this->info.getErrPage() << std::endl;
-        if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
+        if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
+        {
+		    return (this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str()));
+
+        }
+	    else if (isDir(completePath.c_str()))
+	    {
+	    	if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
+	    		return (this->response = atachStatus(SUCCESS, fileToStr(this->info.locations_getter()[matchedLocation].getIndex().c_str()).c_str()));
+	    	else
+	    		return (this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str()));
+	    }
+        else if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
             return (this->response = atachStatus(NOT_FOUND, fileToStr(this->info.getErrPage().c_str()).c_str()));
         else
             return (this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str()));
@@ -134,8 +146,9 @@ void	RequestHandler::addNewEnvp()
 
 
 
-RequestHandler::RequestHandler(ServerConf info, std::string req): info(info), request(req)
+RequestHandler::RequestHandler(ServerConf info, Connection *req): info(info), request(req->getHeader())
 {
+    this->req = req;
 }
 
 RequestHandler::~RequestHandler()

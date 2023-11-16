@@ -33,16 +33,14 @@ unsigned long getBodyLenght(std::string header)
 void    Connection::addToBuffer(const char *toAdd)
 {
     char *newBuffer;
-    int     temp = 0;
+    int i, j;
 
     newBuffer = new char [this->oldBufferLen + this->newBufferLen];
     memset(newBuffer, 0, this->oldBufferLen + this->newBufferLen);
-    for (unsigned long i = 0; i < this->oldBufferLen; i++)
+    for (i = 0; i < this->oldBufferLen; i++)
         newBuffer[i] = this->buffer[i];
-    if (this->oldBufferLen > 0)
-        temp = this->oldBufferLen - 1;  
-    for (unsigned long i = 0; i < this->newBufferLen; i++)
-        newBuffer[temp + i] = toAdd[i];
+    for (j = 0; j < this->newBufferLen; j++)
+        newBuffer[i + j] = toAdd[j];
     if (this->buffer)
         delete [] this->buffer; 
     this->buffer = newBuffer;
@@ -60,6 +58,7 @@ int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
             maxBodySizeExeeded = 1;
             return (1);
         }
+        maxBodySizeExeeded = 0;
         if (this->bodySize > 0 && (this->headerSize + this->bodySize) <= byteAlreadyRead)
         {
             this->body = new char [this->bodySize];
@@ -81,6 +80,7 @@ void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
     if (this->handleBody(maxBodySizeExeeded, maxBodySize))
     {
         this->pollfd->events = POLLOUT;
+        	std::cout << this->buffer << std::endl;
         return ;
     }
     tempBuffer = new char [toRead];

@@ -47,6 +47,7 @@ RequestHandler &RequestHandler::operator=(const RequestHandler &cpy)
     this->response = cpy.getRes();
     this->requestedUrl = cpy.getRequestedUrl();
     this->envp = cpy.getEnvp();
+    this->resSize = cpy.resSize;
     return (*this);
 }
 
@@ -202,11 +203,16 @@ void RequestHandler::atachStatus(const char *status, const char *fileName, std::
     }
 }
 
-RequestHandler::RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp): info(info), request(req->getHeader())
+RequestHandler::RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp, bool bodySizeExeeded): info(info), request(req->getHeader())
 {
     this->envp = envp;
     this->req = req;
     this->response = 0;
+    if (bodySizeExeeded)
+    {
+        atachStatus("HTTP/1.1 413 Request Entity Too Large", "./view/displayError/err.html", "");
+        return ;
+    }
     this->findMethod();
 }
 

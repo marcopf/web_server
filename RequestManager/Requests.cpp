@@ -8,7 +8,6 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     std::string		completePath = getSearchPath(matchedLocation);
 
     addNewEnvp();
-	std::cout << "search: " << completePath << std::endl;
     if (matchedLocation == -1 && this->requestedUrl == "/")
 	{
 		if (this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
@@ -67,6 +66,51 @@ std::string	findFileName(std::string bodyInfo)
 	return (fileName);
 }
 
+bool	RequestHandler::saveGenericBody(std::string bodyInfo, std::string toAdd)
+{
+	static int			fileCount;
+	std::stringstream	filename;
+
+	if (this->req->getHeader().find("boundary") == std::string::npos)
+	{
+		filename << "postFile(" <<  fileCount++ << ")";
+		toAdd = toAdd + "/" + filename.str();
+		std::ofstream	newFile(toAdd.c_str(), std::ios::binary);
+		newFile.write(this->req->getBody(), this->req->getBodySize());
+		newFile.close();
+		atachStatus(SUCCESS, WELCOME, "");
+		return true;
+	}
+	return false;
+}
+
+void	RequestHandler::saveMultiPartBody(std::string bodyInfo, int matchedLocation, std::string path, std::string toAdd)
+{
+	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
+	char			*cpy = this->req->getBody() + bodyOffeset;
+	std::string		boundary = bodyInfo.substr(0, bodyInfo.find("\r\n"));
+	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
+	unsigned long	fileSize = headerLen(this->req->getBody() + bodyOffeset, (boundary + "--").c_str(), this->req->getBodySize() - bodyOffeset) - 2;
+	std::string		fileName = findFileName(bodyInfo);
+
+	addNewEnvp();
+	if (toAdd == "" || toAdd == "null")
+		path = fileName.c_str();
+	path = toAdd + "/" + fileName.c_str();
+    if (this->requestedUrl.find("cgi-bin") != std::string::npos && baseCgiPath != "null")
+    {
+        executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
+		return ;
+    }
+	std::ofstream	newFile(path.c_str(), std::ios::binary);
+	if (cpy[0] == 10 || cpy[0] == 13)
+		newFile.write(cpy + 1, fileSize);
+	else
+		newFile.write(cpy, fileSize - 1);
+	newFile.close();
+	atachStatus(SUCCESS, WELCOME, "");
+}
+
 void    RequestHandler::postRequestHandler(int matchedLocation)
 {
 	if (!this->req->getBody())
@@ -76,38 +120,15 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	}
 	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
 	std::string 	bodyInfo = std::string(this->req->getBody(), bodyOffeset);
-	std::string		boundary = bodyInfo.substr(0, bodyInfo.find("\r\n"));
-	std::string		fileName = findFileName(bodyInfo);
-	unsigned long	fileSize = headerLen(this->req->getBody() + bodyOffeset, (boundary + "--").c_str(), this->req->getBodySize() - bodyOffeset) - 2;
-	char			*cpy = this->req->getBody() + bodyOffeset;
-	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
-	unsigned long	pos = this->requestedUrl.find("cgi-bin");
 	std::string		toAdd, path;
-
-	addNewEnvp();
-    if (pos != std::string::npos && baseCgiPath != "null")
-    {
-        executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
-		return ;
-    }
 	if (matchedLocation == -1)
 		toAdd = this->info.getPath();
 	else
 		toAdd = this->info.locations_getter()[matchedLocation].getPath();
 	if (toAdd != "" && toAdd != "null")
-	{
-		path = toAdd + "/" + fileName.c_str();
 		mkdir(toAdd.c_str(), 0777);
-	}
-	else
-		path = fileName.c_str();
-	std::ofstream	newFile(path.c_str(), std::ios::binary);
-	if (cpy[0] == 10 || cpy[0] == 13)
-		newFile.write(cpy + 1, fileSize - 1);
-	else
-		newFile.write(cpy, fileSize);
-	newFile.close();
-	atachStatus(SUCCESS, WELCOME, "");
+	if (!this->saveGenericBody(bodyInfo, toAdd))
+		this->saveMultiPartBody(bodyInfo, matchedLocation, path, toAdd);
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)

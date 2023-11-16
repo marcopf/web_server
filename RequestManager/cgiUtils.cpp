@@ -54,6 +54,17 @@ char	**convertVector(std::vector<std::string> vect)
 	return (ret);
 }
 
+std::string	fileToStr(std::string file)
+{
+	std::string str;
+	std::ifstream f(file.c_str());
+	std::ostringstream ss;
+	ss << f.rdbuf();
+	str = ss.str();
+	f.close();
+	return (str);
+}
+
 std::string	RequestHandler::waitAndCheck(int pid, int *fd)
 {
 	std::time_t	start = time(0);

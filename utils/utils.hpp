@@ -25,7 +25,6 @@ class Connection;
 
 unsigned long	getContentLenght(std::string header);
 std::string		atachStatus(const char *status, const char *body);
-std::string		fileToStr(std::string file);
 std::string		findMethod(Connection *req, ServerConf info, std::vector<std::string> envp);
 std::string		findUrl(std::string req);
 char	        *ft_strnstr(const char *haystack, const char *needle, size_t len);

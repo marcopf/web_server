@@ -69,10 +69,12 @@ public:
     std::string                 waitAndCheck(int pid, int *fd);
     void                        executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
     void                        findMethod();
+    bool                        saveGenericBody(std::string bodyInfo, std::string toAdd);
     void                        atachStatus(const char *status, const char *fileName, std::string body);
+    void                        saveMultiPartBody(std::string bodyInfo, int matchedLocation, std::string path, std::string toAdd);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);
-    RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp);
+    RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp, bool bodySizeExeeded);
     ~RequestHandler();
 };
 

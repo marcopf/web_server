@@ -69,37 +69,6 @@ unsigned long headerLen(const char *haystack, const char *needle, size_t len)
 	return (0);
 }
 
-
-std::string	fileToStr(std::string file)
-{
-	std::string str;
-	std::ifstream f(file.c_str());
-	std::ostringstream ss;
-	ss << f.rdbuf();
-	str = ss.str();
-	f.close();
-	return (str);
-}
-
-// std::string findMethod(Connection *req, ServerConf info, std::vector<std::string> envp)
-// {
-// 	RequestHandler parser(info, req);
-
-//     if (req->getHeader().substr(0, 3) == "GET")
-// 	{
-//         return (parser.start("GET", findUrl(req->getHeader()), envp));
-// 	}
-//     else if (req->getHeader().substr(0, 4) == "POST")
-//     {
-// 		return (parser.start("POST", findUrl(req->getHeader()), envp));
-// 	}
-//     else if (req->getHeader().substr(0, 6) == "DELETE")
-// 	{
-//         return (parser.start("DELETE", findUrl(req->getHeader()), envp));
-// 	}
-// 	return (atachStatus("HTTP/1.1 405 Method Not Allowed", fileToStr("./view/displayError/method_err.html").c_str()));
-// }
-
 std::string findUrl(std::string req)
 {
 	unsigned long firstSpace;

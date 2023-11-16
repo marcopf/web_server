@@ -112,17 +112,18 @@ Socket::Socket(ServerConf data, char **envp_main)
 
 void	Socket::polloutFunc(int i, int debug)
 {
-	if (this->maxBodySizeExeeded)
-	{
-		std::string response = atachStatus("HTTP/1.1 413 Request Entity Too Large", fileToStr("./view/displayError/err.html").c_str());
+	// if (this->maxBodySizeExeeded)
+	// {
+	// 	std::string response = atachStatus("HTTP/1.1 413 Request Entity Too Large", fileToStr("./view/displayError/err.html").c_str());
 		
-		send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
-		return ;
-	}
-	std::string response = findMethod(this->connections[this->pollfds[i].fd], this->serverInfo, this->envp);
+	// 	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
+	// 	return ;
+	// }
+	RequestHandler craftedRes(this->serverInfo, this->connections[this->pollfds[i].fd], this->envp);
+	// std::string response = findMethod(this->connections[this->pollfds[i].fd], this->serverInfo, this->envp);
 	if (debug)
 		std::cout << this->connections[this->pollfds[i].fd]->getHeader() << std::endl;
-	send(this->pollfds[i].fd, response.c_str(), response.length(), MSG_DONTWAIT);
+	send(this->pollfds[i].fd, craftedRes.getRes(), craftedRes.getResSize(), MSG_DONTWAIT);
 	this->pollfds[i].revents = POLLERR;
 }
 

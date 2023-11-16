@@ -9,9 +9,13 @@ std::string RequestHandler::getReq() const
 {
     return (this->request);
 }
-std::string RequestHandler::getRes() const
+char *RequestHandler::getRes() const
 {
     return (this->response);
+}
+unsigned long   RequestHandler::getResSize() const
+{
+    return (this->resSize);
 }
 std::vector<std::string> RequestHandler::getEnvp() const
 {
@@ -64,23 +68,23 @@ void RequestHandler::requestFilter(long int matchedLocation)
         || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos) || matchedLocation == -1)
     {
         if (redirectUrl != "null")
-            this->response = REDIRECT + redirectUrl + "\r\n\r\n";
+            this->response = (char *)(REDIRECT + redirectUrl + "\r\n\r\n").c_str();
         else if (matchedLocation == -1 && this->info.getMethod().find(this->method) == std::string::npos)
         {
-            this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/displayError/method_err.html").c_str());
+            atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html");
             return ;
         }            
         else if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
             || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getAutoind() == "true" && this->info.locations_getter()[matchedLocation].getMethod().find("GET") != std::string::npos))
-            this->response = callForAutoindex(matchedLocation);
+            callForAutoindex(matchedLocation);
         else
             crossRoads(matchedLocation);
     }
     else
-        this->response = atachStatus(METHOD_NOT_ALLOWED, fileToStr("./view/displayError/method_err.html").c_str());
+        atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html");
 }
 
-std::string RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)
+void RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)
 {
     std::vector<Location>    locations;
     long unsigned int           size = 0;
@@ -105,23 +109,22 @@ std::string RequestHandler::start(std::string method, std::string requestedUrl, 
     {
         if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
         {
-		    return (this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str()));
+		    return (atachStatus(SUCCESS, completePath.c_str()));
 
         }
 	    else if (isDir(completePath.c_str()))
 	    {
 	    	if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
-	    		return (this->response = atachStatus(SUCCESS, fileToStr(this->info.locations_getter()[matchedLocation].getIndex().c_str()).c_str()));
+	    		return (atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str()));
 	    	else
-	    		return (this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str()));
+	    		return (atachStatus(SUCCESS, WELCOME));
 	    }
         else if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
-            return (this->response = atachStatus(NOT_FOUND, fileToStr(this->info.getErrPage().c_str()).c_str()));
+            return (atachStatus(NOT_FOUND, this->info.getErrPage().c_str()));
         else
-            return (this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str()));
+            return (atachStatus(NOT_FOUND, "./view/displayError/err.html"));
     }
     this->requestFilter(matchedLocation);
-    return (this->response);
 }
 
 RequestHandler::RequestHandler(const RequestHandler &cpy)
@@ -144,13 +147,62 @@ void	RequestHandler::addNewEnvp()
     }
 }
 
-
-
-RequestHandler::RequestHandler(ServerConf info, Connection *req): info(info), request(req->getHeader())
+void RequestHandler::findMethod()
 {
+    if (req->getHeader().substr(0, 3) == "GET")
+	{
+        this->start("GET", findUrl(this->req->getHeader()), envp);
+	}
+    else if (req->getHeader().substr(0, 4) == "POST")
+    {
+		this->start("POST", findUrl(this->req->getHeader()), envp);
+	}
+    else if (req->getHeader().substr(0, 6) == "DELETE")
+	{
+        this->start("DELETE", findUrl(this->req->getHeader()), envp);
+	}
+    else
+	    atachStatus("HTTP/1.1 405 Method Not Allowed", "./view/displayError/method_err.html");
+}
+
+void RequestHandler::atachStatus(const char *status, const char *fileName)
+{
+	std::stringstream ss;
+	std::string status_s = status;
+    int i, j;
+    std::ifstream file(fileName, std::ios::binary);
+
+    file.seekg(0, std::ios::end);
+    std::streampos fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    char *buffer = new char [fileSize];
+    file.read(buffer, fileSize);
+    file.close();
+	ss << status << "\r\nContent-length: " << fileSize << "\r\n\r\n";
+    if (this->response)
+        delete [] this->response;
+    this->response = new char [ss.str().length() + fileSize + 2];
+    this->resSize = ss.str().length() + fileSize + 2;
+    for (i = 0; i < ss.str().length(); i++)
+        this->response[i] = ss.str()[i];
+    for (j = 0; j < fileSize; j++)
+        this->response[i + j] = buffer[j];
+    this->response[i + j] = '\r';
+    this->response[i + j + 1] = '\n';
+    delete [] buffer;
+}
+
+RequestHandler::RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp): info(info), request(req->getHeader())
+{
+    this->envp = envp;
     this->req = req;
+    this->response = 0;
+    this->findMethod();
 }
 
 RequestHandler::~RequestHandler()
 {
+    if (this->response)
+        delete [] this->response;
 }

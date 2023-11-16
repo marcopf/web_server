@@ -31,14 +31,6 @@ std::string		findUrl(std::string req);
 char	        *ft_strnstr(const char *haystack, const char *needle, size_t len);
 unsigned long   headerLen(const char *haystack, const char *needle, size_t len);
 
-//CGI UTILS
-char			**createMat(std::string command, std::string path, char  *cgiParamater);
-void			freeMat(char **mat);
-std::string		extensionFinder(std::string path);
-char			**convertVector(std::vector<std::string> vect);
-std::string		waitAndCheck(int pid, int *fd);
-std::string		atachStatusCgi(const char *status, const char *body);
-std::string		executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
 
 
 #endif

@@ -108,18 +108,18 @@ std::string	RequestHandler::autoindex(std::string directoryPath, int i)
 	return (ss.str());
 }
 
-std::string	RequestHandler::callForAutoindex(int i)
+void	RequestHandler::callForAutoindex(int i)
 {
 	std::string directoryPath = this->getSearchPath(i);
 
 	if (isFile(directoryPath.c_str()))
-		return (atachStatus(SUCCESS, fileToStr(directoryPath.c_str()).c_str()));
+		return (atachStatus(SUCCESS, directoryPath.c_str()));
 	else if (!isDir(directoryPath.c_str()))
 	{
 		if (this->info.getErrPage() == "null")
-			return (atachStatus(NOT_FOUND, fileToStr(ERR_PAGE).c_str()));
+			return (atachStatus(NOT_FOUND, ERR_PAGE));
 		else
-			return (atachStatus(NOT_FOUND, fileToStr(ERR_AUTOINDEX).c_str()));
+			return (atachStatus(NOT_FOUND, ERR_AUTOINDEX));
 	}
 	return (atachStatus(NOT_FOUND, autoindex(this->getSearchPath(i), i).c_str()));
 }

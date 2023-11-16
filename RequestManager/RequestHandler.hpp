@@ -41,21 +41,23 @@ private:
     std::string                 request;
     std::string                 method;
     std::string                 requestedUrl;
-    std::string                 response;
+    char                        *response;
     std::vector<std::string>    envp;
     Connection                  *req;
+    unsigned long               resSize;
 public:
     std::string                 getReq() const;
-    std::string                 getRes() const;
+    char                        *getRes() const;
+    unsigned long               getResSize() const;
     std::string                 getMethod() const;
     std::vector<std::string>    getEnvp() const;
     std::string                 getRequestedUrl() const;
     ServerConf                  getInfo() const;
     void                        setMethod(std::string method);
     void                        setRequestedUrl(std::string url);
-    std::string                 start(std::string method, std::string requestedUrl, std::vector<std::string> envp);
+    void                        start(std::string method, std::string requestedUrl, std::vector<std::string> envp);
     void                        requestFilter(long int matchedLocation);
-    std::string                 callForAutoindex(int i);
+    void                        callForAutoindex(int i);
     std::string                 getSearchPath(int i);
     void                        crossRoads(int matchedLocation);
     void                        getRequestHandler(int matchedLocation);
@@ -64,9 +66,13 @@ public:
     void                        addNewEnvp();
     void                        createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret);
     std::string                 autoindex(std::string directoryPath, int i);
+    std::string                 waitAndCheck(int pid, int *fd);
+    std::string                 executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
+    void                        findMethod();
+    void                        atachStatus(const char *status, const char *body);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);
-    RequestHandler(ServerConf info, Connection *req);
+    RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp);
     ~RequestHandler();
 };
 

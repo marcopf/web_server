@@ -12,28 +12,28 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     if (matchedLocation == -1 && this->requestedUrl == "/")
 	{
 		if (this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
-			this->response = atachStatus(SUCCESS, fileToStr(this->info.getIndex().c_str()).c_str());
+			atachStatus(SUCCESS, this->info.getIndex().c_str());
 		else
-			this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str());
+			atachStatus(SUCCESS, WELCOME);
 	}
-    else if (pos != std::string::npos && baseCgiPath != "null")
-    {
-        fileName = this->requestedUrl.substr(pos + 7);
-        this->response = executeFile(baseCgiPath + fileName, this->envp, 0);
-    }
+    // else if (pos != std::string::npos && baseCgiPath != "null")
+    // {
+    //     fileName = this->requestedUrl.substr(pos + 7);
+    //     this->response = executeFile(baseCgiPath + fileName, this->envp, 0);
+    // }
     else if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
-		this->response = atachStatus(SUCCESS,fileToStr(completePath.c_str()).c_str());
+		atachStatus(SUCCESS, completePath.c_str());
 	else if (isDir(completePath.c_str()))
 	{
 		if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
-			this->response = atachStatus(SUCCESS, fileToStr(this->info.locations_getter()[matchedLocation].getIndex().c_str()).c_str());
+			atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str());
 		else
-			this->response = atachStatus(SUCCESS, fileToStr(WELCOME).c_str());
+			atachStatus(SUCCESS, WELCOME);
 	}
 	else if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
-		this->response = atachStatus(NOT_FOUND,fileToStr(this->info.getErrPage().c_str()).c_str());
+		atachStatus(NOT_FOUND, this->info.getErrPage().c_str());
 	else
-		this->response = atachStatus(NOT_FOUND, fileToStr(ERR_PAGE).c_str());
+		atachStatus(NOT_FOUND, ERR_PAGE);
 }
 
 int	getBodyInfo(char *body, int len)
@@ -71,7 +71,7 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 {
 	if (!this->req->getBody())
 	{
-		this->response =  atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
+		atachStatus(SUCCESS, WELCOME);
 		return ;
 	}
 	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
@@ -85,11 +85,11 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	std::string		toAdd, path;
 
 	addNewEnvp();
-    if (pos != std::string::npos && baseCgiPath != "null")
-    {
-        this->response = executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
-		return ;
-    }
+    // if (pos != std::string::npos && baseCgiPath != "null")
+    // {
+    //     this->response = executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
+	// 	return ;
+    // }
 
 	if (matchedLocation == -1)
 		toAdd = this->info.getPath();
@@ -108,7 +108,7 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	else
 		newFile.write(cpy, fileSize);
 	newFile.close();
-	this->response =  atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
+	atachStatus(SUCCESS, WELCOME);
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)
@@ -122,13 +122,13 @@ void    RequestHandler::deleteRequestHandler(int matchedLocation)
 		if ("fileToDelete" == this->envp[i].substr(0, 12))
 		{
 			if (this->envp[i].substr(13).find("..") == std::string::npos &&  unlink((uploadDirectory + "/" + this->envp[i].substr(13)).c_str()) == -1)
-				this->response = atachStatus(NOT_FOUND_DELETE, fileToStr("./view/displayError/err.html").c_str());
+				atachStatus(NOT_FOUND_DELETE, "./view/displayError/err.html");
 			else if (this->envp[i].substr(13).find("..") == std::string::npos)
-				this->response = atachStatus(SUCCESS, fileToStr("./view/welcome.html").c_str());
+				atachStatus(SUCCESS, WELCOME);
 			else
-				this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str());
+				atachStatus(NOT_FOUND, "./view/displayError/err.html");
 			return ;
 		}
 	}
-    this->response = atachStatus(NOT_FOUND, fileToStr("./view/displayError/err.html").c_str());
+    atachStatus(NOT_FOUND, "./view/displayError/err.html");
 }

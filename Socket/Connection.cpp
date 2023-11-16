@@ -64,9 +64,6 @@ int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
         {
             this->body = new char [this->bodySize];
             memcpy(this->body, ft_strnstr(this->buffer, "\r\n\r\n", this->oldBufferLen + this->newBufferLen) + 4, this->bodySize);
-            std::ofstream img("img.jpg", std::ios::binary);
-            img.write(this->body, this->bodySize);
-            img.close();
             return (1);
         }
         if (this->bodySize == 0 || (this->headerSize + this->bodySize) <= byteAlreadyRead)

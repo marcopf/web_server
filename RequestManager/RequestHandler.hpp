@@ -67,9 +67,9 @@ public:
     void                        createFile(std::stringstream &filename, int matchedLocation, int &isFile, int &counter, std::string &ret);
     std::string                 autoindex(std::string directoryPath, int i);
     std::string                 waitAndCheck(int pid, int *fd);
-    std::string                 executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
+    void                        executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter);
     void                        findMethod();
-    void                        atachStatus(const char *status, const char *body);
+    void                        atachStatus(const char *status, const char *fileName, std::string body);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);
     RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp);

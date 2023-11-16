@@ -71,7 +71,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
             this->response = (char *)(REDIRECT + redirectUrl + "\r\n\r\n").c_str();
         else if (matchedLocation == -1 && this->info.getMethod().find(this->method) == std::string::npos)
         {
-            atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html");
+            atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html", "");
             return ;
         }            
         else if ((matchedLocation == -1 && this->info.getAutoind() == "true" && this->info.getMethod().find("GET") != std::string::npos)
@@ -81,7 +81,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
             crossRoads(matchedLocation);
     }
     else
-        atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html");
+        atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html", "");
 }
 
 void RequestHandler::start(std::string method, std::string requestedUrl, std::vector<std::string> envp)
@@ -109,20 +109,20 @@ void RequestHandler::start(std::string method, std::string requestedUrl, std::ve
     {
         if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
         {
-		    return (atachStatus(SUCCESS, completePath.c_str()));
+		    return (atachStatus(SUCCESS, completePath.c_str(), ""));
 
         }
 	    else if (isDir(completePath.c_str()))
 	    {
 	    	if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
-	    		return (atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str()));
+	    		return (atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str(), ""));
 	    	else
-	    		return (atachStatus(SUCCESS, WELCOME));
+	    		return (atachStatus(SUCCESS, WELCOME, ""));
 	    }
         else if (this->info.getErrPage() != "null" && fileExists(this->info.getErrPage().c_str()))
-            return (atachStatus(NOT_FOUND, this->info.getErrPage().c_str()));
+            return (atachStatus(NOT_FOUND, this->info.getErrPage().c_str(), ""));
         else
-            return (atachStatus(NOT_FOUND, "./view/displayError/err.html"));
+            return (atachStatus(NOT_FOUND, "./view/displayError/err.html", ""));
     }
     this->requestFilter(matchedLocation);
 }
@@ -162,35 +162,44 @@ void RequestHandler::findMethod()
         this->start("DELETE", findUrl(this->req->getHeader()), envp);
 	}
     else
-	    atachStatus("HTTP/1.1 405 Method Not Allowed", "./view/displayError/method_err.html");
+	    atachStatus("HTTP/1.1 405 Method Not Allowed", "./view/displayError/method_err.html", "");
 }
 
-void RequestHandler::atachStatus(const char *status, const char *fileName)
+void RequestHandler::atachStatus(const char *status, const char *fileName, std::string body)
 {
 	std::stringstream ss;
 	std::string status_s = status;
     int i, j;
-    std::ifstream file(fileName, std::ios::binary);
 
-    file.seekg(0, std::ios::end);
-    std::streampos fileSize = file.tellg();
-    file.seekg(0, std::ios::beg);
-
-    char *buffer = new char [fileSize];
-    file.read(buffer, fileSize);
-    file.close();
-	ss << status << "\r\nContent-length: " << fileSize << "\r\n\r\n";
-    if (this->response)
-        delete [] this->response;
-    this->response = new char [ss.str().length() + fileSize + 2];
-    this->resSize = ss.str().length() + fileSize + 2;
-    for (i = 0; i < ss.str().length(); i++)
-        this->response[i] = ss.str()[i];
-    for (j = 0; j < fileSize; j++)
-        this->response[i + j] = buffer[j];
-    this->response[i + j] = '\r';
-    this->response[i + j + 1] = '\n';
-    delete [] buffer;
+    if (body == "")
+    {
+        std::ifstream file(fileName, std::ios::binary);
+        file.seekg(0, std::ios::end);
+        std::streampos fileSize = file.tellg();
+        file.seekg(0, std::ios::beg);
+        char *buffer = new char [fileSize];
+        file.read(buffer, fileSize);
+        file.close();
+        ss << status << "\r\nContent-length: " << fileSize << "\r\n\r\n";
+        if (this->response)
+            delete [] this->response;
+        this->response = new char [ss.str().length() + fileSize + 2];
+        this->resSize = ss.str().length() + fileSize + 2;
+        for (i = 0; i < ss.str().length(); i++)
+            this->response[i] = ss.str()[i];
+        for (j = 0; j < fileSize; j++)
+            this->response[i + j] = buffer[j];
+        this->response[i + j] = '\r';
+        this->response[i + j + 1] = '\n';
+        delete [] buffer;
+    }
+    else
+    {
+        ss << status << "\r\nContent-length: " << body.length() << "\r\n\r\n" << body << "\r\n";
+        this->response = new char [ss.str().length()];
+        for (i = 0; i < ss.str().length(); i++)
+            this->response[i] = ss.str()[i];
+    }
 }
 
 RequestHandler::RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp): info(info), request(req->getHeader())

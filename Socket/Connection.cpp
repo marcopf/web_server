@@ -32,8 +32,8 @@ unsigned long getBodyLenght(std::string header)
 
 void    Connection::addToBuffer(const char *toAdd)
 {
-    char *newBuffer;
-    int i, j;
+    char            *newBuffer;
+    unsigned long   i, j;
 
     newBuffer = new char [this->oldBufferLen + this->newBufferLen];
     memset(newBuffer, 0, this->oldBufferLen + this->newBufferLen);

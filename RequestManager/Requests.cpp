@@ -66,7 +66,7 @@ std::string	findFileName(std::string bodyInfo)
 	return (fileName);
 }
 
-bool	RequestHandler::saveGenericBody(std::string bodyInfo, std::string toAdd)
+bool	RequestHandler::saveGenericBody(std::string toAdd)
 {
 	static int			fileCount;
 	std::stringstream	filename;
@@ -127,7 +127,7 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 		toAdd = this->info.locations_getter()[matchedLocation].getPath();
 	if (toAdd != "" && toAdd != "null")
 		mkdir(toAdd.c_str(), 0777);
-	if (!this->saveGenericBody(bodyInfo, toAdd))
+	if (!this->saveGenericBody(toAdd))
 		this->saveMultiPartBody(bodyInfo, matchedLocation, path, toAdd);
 }
 

@@ -168,9 +168,10 @@ void RequestHandler::findMethod()
 
 void RequestHandler::atachStatus(const char *status, const char *fileName, std::string body)
 {
-	std::stringstream ss;
-	std::string status_s = status;
-    int i, j;
+	std::stringstream   ss;
+	std::string         status_s = status;
+    unsigned long       i;
+    long                j;
 
     if (body == "")
     {

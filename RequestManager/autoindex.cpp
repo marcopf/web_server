@@ -111,7 +111,6 @@ std::string	RequestHandler::autoindex(std::string directoryPath, int i)
 void	RequestHandler::callForAutoindex(int i)
 {
 	std::string directoryPath = this->getSearchPath(i);
-
 	if (isFile(directoryPath.c_str()))
 		return (atachStatus(SUCCESS, directoryPath.c_str(), ""));
 	else if (!isDir(directoryPath.c_str()))
@@ -121,5 +120,5 @@ void	RequestHandler::callForAutoindex(int i)
 		else
 			return (atachStatus(NOT_FOUND, ERR_AUTOINDEX, ""));
 	}
-	return (atachStatus(NOT_FOUND, 0, autoindex(this->getSearchPath(i), i).c_str()));
+	return (atachStatus(SUCCESS, 0, autoindex(this->getSearchPath(i), i).c_str()));
 }

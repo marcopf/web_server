@@ -69,7 +69,7 @@ void RequestHandler::requestFilter(long int matchedLocation)
         || (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getMethod().find(this->method) != std::string::npos) || matchedLocation == -1)
     {
         if (redirectUrl != "null")
-            this->response = (char *)(REDIRECT + redirectUrl + "\r\n\r\n").c_str();
+            this->response = strdup((char *)(REDIRECT + redirectUrl + "\r\n\r\n").c_str());
         else if (matchedLocation == -1 && this->info.getMethod().find(this->method) == std::string::npos)
         {
             atachStatus(METHOD_NOT_ALLOWED, "./view/displayError/method_err.html", "");

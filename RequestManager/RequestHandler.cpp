@@ -184,8 +184,11 @@ void RequestHandler::atachStatus(const char *status, const char *fileName, std::
         file.close();
         ss << status << "\r\nContent-length: " << fileSize << "\r\n\r\n";
         if (this->response)
+        {
             delete [] this->response;
-        this->response = new char [ss.str().length() + fileSize + 2];
+            this->response = 0;
+        }
+        this->response = new char [ss.str().length() + fileSize + 3];
         this->resSize = ss.str().length() + fileSize + 2;
         for (i = 0; i < ss.str().length(); i++)
             this->response[i] = ss.str()[i];
@@ -193,14 +196,22 @@ void RequestHandler::atachStatus(const char *status, const char *fileName, std::
             this->response[i + j] = buffer[j];
         this->response[i + j] = '\r';
         this->response[i + j + 1] = '\n';
+        this->response[i + j + 2] = '\0';
         delete [] buffer;
     }
     else
     {
+        if (this->response)
+        {
+            delete [] this->response;
+            this->response = 0;
+        }
         ss << status << "\r\nContent-length: " << body.length() << "\r\n\r\n" << body << "\r\n";
-        this->response = new char [ss.str().length()];
+        this->response = new char [ss.str().length() + 1];
+        this->resSize = ss.str().length() + 1;
         for (i = 0; i < ss.str().length(); i++)
             this->response[i] = ss.str()[i];
+        this->response[i] = 0;
     }
 }
 
@@ -220,5 +231,8 @@ RequestHandler::RequestHandler(ServerConf info, Connection *req, std::vector<std
 RequestHandler::~RequestHandler()
 {
     if (this->response)
+    {
         delete [] this->response;
+        this->response = 0;
+    }
 }

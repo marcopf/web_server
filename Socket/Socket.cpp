@@ -122,7 +122,6 @@ void	Socket::polloutFunc(int i, int debug)
 
 void	Socket::checkFd(int debug)
 {
-	removePollFds();
 	int res = poll(this->pollfds, this->pollPos, 1);
 	if (res > 0)
 	{
@@ -148,6 +147,7 @@ void	Socket::checkFd(int debug)
 			else if (this->pollfds[i].revents == POLLOUT)
 				this->polloutFunc(i, debug);
 		}
+		removePollFds();
 	}
 }
 

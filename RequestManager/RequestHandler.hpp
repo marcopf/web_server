@@ -71,7 +71,7 @@ public:
     void                        findMethod();
     bool                        saveGenericBody(std::string toAdd);
     void                        atachStatus(const char *status, const char *fileName, std::string body);
-    void                        saveMultiPartBody(std::string bodyInfo, int matchedLocation, std::string path, std::string toAdd);
+    void                        saveMultiPartBody(std::string bodyInfo, std::string path, std::string toAdd);
     RequestHandler &operator=(const RequestHandler &cpy);
     RequestHandler(const RequestHandler &cpy);
     RequestHandler(ServerConf info, Connection *req, std::vector<std::string> envp, bool bodySizeExeeded);

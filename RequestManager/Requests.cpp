@@ -84,12 +84,11 @@ bool	RequestHandler::saveGenericBody(std::string toAdd)
 	return false;
 }
 
-void	RequestHandler::saveMultiPartBody(std::string bodyInfo, int matchedLocation, std::string path, std::string toAdd)
+void	RequestHandler::saveMultiPartBody(std::string bodyInfo, std::string path, std::string toAdd)
 {
 	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
 	char			*cpy = this->req->getBody() + bodyOffeset;
 	std::string		boundary = bodyInfo.substr(0, bodyInfo.find("\r\n"));
-	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
 	unsigned long	fileSize = headerLen(this->req->getBody() + bodyOffeset, (boundary + "--").c_str(), this->req->getBodySize() - bodyOffeset) - 2;
 	std::string		fileName = findFileName(bodyInfo);
 
@@ -97,11 +96,6 @@ void	RequestHandler::saveMultiPartBody(std::string bodyInfo, int matchedLocation
 	if (toAdd == "" || toAdd == "null")
 		path = fileName.c_str();
 	path = toAdd + "/" + fileName.c_str();
-    if (this->requestedUrl.find("cgi-bin") != std::string::npos && baseCgiPath != "null")
-    {
-        executeFile(baseCgiPath + fileName, this->envp, this->req->getBody());
-		return ;
-    }
 	std::ofstream	newFile(path.c_str(), std::ios::binary);
 	if (cpy[0] == 10 || cpy[0] == 13)
 		newFile.write(cpy + 1, fileSize);
@@ -121,6 +115,8 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
 	std::string 	bodyInfo = std::string(this->req->getBody(), bodyOffeset);
 	std::string		toAdd, path;
+	std::string     baseCgiPath = matchedLocation > -1 ? this->info.locations_getter()[matchedLocation].getCgiBin() : "null";
+	unsigned long	pos = this->requestedUrl.find("cgi-bin");
 	if (matchedLocation == -1)
 		toAdd = this->info.getPath();
 	else
@@ -128,7 +124,13 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
 	if (toAdd != "" && toAdd != "null")
 		mkdir(toAdd.c_str(), 0777);
 	if (!this->saveGenericBody(toAdd))
-		this->saveMultiPartBody(bodyInfo, matchedLocation, path, toAdd);
+		this->saveMultiPartBody(bodyInfo, path, toAdd);
+    if (pos != std::string::npos && baseCgiPath != "null")
+    {
+		std::string cgiFile = this->requestedUrl.substr(pos + 7);
+        executeFile(baseCgiPath + cgiFile, this->envp, this->req->getBody());
+		return ;
+    }
 }
 
 void    RequestHandler::deleteRequestHandler(int matchedLocation)

@@ -3,7 +3,6 @@
 char **createMat(std::string command, std::string path, char  *cgiParamater)
 {
 	char **mat;
-
 	mat = (char **)malloc(sizeof(char *) * 3);
 	if (command == "./")
 		command += path;
@@ -13,6 +12,7 @@ char **createMat(std::string command, std::string path, char  *cgiParamater)
 	else
 		mat[1] = strdup(path.c_str());
 	mat[2] = NULL;
+
 	return (mat);
 }
 

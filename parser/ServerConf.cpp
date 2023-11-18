@@ -7,7 +7,12 @@ int	ServerConf::getIntPort() const
 }
 int	ServerConf::getIntMbs() const
 {
-	return (atoi(this->max_body_size.c_str()));
+	if (atoi(this->max_body_size.c_str()) == 0 && this->max_body_size == "0")
+		return (0);
+	if (atoi(this->max_body_size.c_str()) == 0 && this->max_body_size != "0")
+		return (INT_MAX);
+	else
+		return (atoi(this->max_body_size.c_str()));
 }
 
 std::string	ServerConf::getPort() const

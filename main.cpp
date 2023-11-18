@@ -18,6 +18,34 @@ void stop(int dummy)
 	keepRunning = 0;
 }
 
+int	checkParsedInfo(General_parser parsedInfo)
+{
+	std::vector<ServerConf> servers = parsedInfo.getServersConf();
+
+	for (unsigned int i = 0; i < servers.size(); i++)
+	{
+		std::vector<Location> locations = servers[i].locations_getter();
+		if (servers[i].getPort() == "null")
+			return (1);
+		if (servers[i].getRoot() == "null")
+			return (1);
+		if (servers[i].getPath() == "null")
+			return (1);
+		if (servers[i].getMethod() == "null")
+			return (1);
+		for (unsigned int j = 0; j < locations.size(); j++)
+		{
+			if (locations[j].getRoot() == "null")
+				return (1);
+			if (locations[j].getPath() == "null")
+				return (1);
+			if (locations[j].getMethod() == "null")
+				return (1);
+		}
+	}
+	return (0);
+}
+
 int main(int argc, char **argv, char **envp)
 {
 	General_parser	parser;
@@ -36,6 +64,11 @@ int main(int argc, char **argv, char **envp)
 	{
 		debug = 1;
 		parser = General_parser(argv[1], debug);
+	}
+	if (checkParsedInfo(parser))
+	{
+		std::cerr << RED << "ERROR missing important info in " << argv[1] << GREEN << std::endl <<  "path, root and method must be present in each location the main one must include also port..." << std::endl << END << std::endl;
+		return (3);
 	}
 	std::vector<ServerConf> list = parser.getServersConf();
 	(void)argc;

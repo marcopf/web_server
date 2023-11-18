@@ -117,6 +117,8 @@ void RequestHandler::start(std::string method, std::string requestedUrl, std::ve
 	    {
 	    	if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
 	    		return (atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str(), ""));
+            else if (matchedLocation == -1 && this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
+                return (atachStatus(SUCCESS, this->info.getIndex().c_str(), ""));
 	    	else
 	    		return (atachStatus(SUCCESS, WELCOME, ""));
 	    }

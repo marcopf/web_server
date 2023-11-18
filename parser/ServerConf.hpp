@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include "Location.hpp"
+#include <limits.h>
 
 #define RED "\x1b[1;31m"
 #define CYAN "\x1b[1;36m"

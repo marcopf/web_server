@@ -118,7 +118,10 @@ void	RequestHandler::executeFile(std::string path, std::vector<std::string> envp
 	}
 	result = waitAndCheck(pid, fd);
 	if (result != "OK")
-		atachStatus(NOT_FOUND, result.c_str(), "");
+	{
+		atachStatus(NOT_FOUND, 0, result.c_str());
+		return ;
+	}
 	while (read(fd[0], &c, 1))
 		executed += c;
 	close(fd[0]);

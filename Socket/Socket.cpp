@@ -125,6 +125,16 @@ void	Socket::checkFd(int debug)
 	int res = poll(this->pollfds, this->pollPos, 1);
 	if (res > 0)
 	{
+		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
+		{
+			if (this->pollfds[i].revents == POLLIN)
+				this->connections[this->pollfds[i].fd]->read(this->maxBodySizeExeeded, this->serverInfo.getIntMbs());
+			else if (this->pollfds[i].revents == POLLOUT)
+				this->polloutFunc(i, debug);
+			else
+				this->pollfds[i].revents = POLLERR;
+		}
+		removePollFds();
 		for (long unsigned int i = 0 ; i < this->serverInfo.getPorts().size(); i++)
 		{
 			if (this->pollfds[i].revents & POLLIN)
@@ -140,14 +150,6 @@ void	Socket::checkFd(int debug)
 				}
 			}
 		}
-		for (int i = this->serverInfo.getPorts().size(); i < this->pollPos; i++)
-		{
-			if (this->pollfds[i].revents == POLLIN)
-				this->connections[this->pollfds[i].fd]->read(this->maxBodySizeExeeded, this->serverInfo.getIntMbs());
-			else if (this->pollfds[i].revents == POLLOUT)
-				this->polloutFunc(i, debug);
-		}
-		removePollFds();
 	}
 }
 

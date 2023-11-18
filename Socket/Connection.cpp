@@ -13,6 +13,15 @@ unsigned long Connection::getBodySize(void)
     return (this->bodySize);
 }
 
+/**
+ * The function "getBodyLength" returns the length of the body content based on the provided header
+ * string.
+ * 
+ * @param header The parameter "header" is a string that represents the HTTP header of a request or
+ * response.
+ * 
+ * @return the length of the body content in the HTTP header.
+ */
 unsigned long getBodyLenght(std::string header)
 {
 	int	pos;
@@ -30,6 +39,12 @@ unsigned long getBodyLenght(std::string header)
 	return (len);
 }
 
+/**
+ * The function addToBuffer appends a character array to the existing buffer.
+ * 
+ * @param toAdd The parameter `toAdd` is a pointer to a character array (`const char *`). It represents
+ * the data that needs to be added to the buffer.
+ */
 void    Connection::addToBuffer(const char *toAdd)
 {
     char            *newBuffer;
@@ -46,6 +61,18 @@ void    Connection::addToBuffer(const char *toAdd)
     this->buffer = newBuffer;
 }
 
+/**
+ * The function handles the body of a connection by checking if the body size exceeds a maximum limit
+ * and copying the body data into a buffer if it has been fully received.
+ * 
+ * @param maxBodySizeExeeded An integer reference variable that will be set to 1 if the body size
+ * exceeds the maximum body size, and 0 otherwise.
+ * @param maxBodySize The maximum allowed size for the body of the connection.
+ * 
+ * @return an integer value. If the body size exceeds the maximum body size, it returns 1. If the body
+ * size does not exceed the maximum body size and the body has been successfully read, it returns 1.
+ * Otherwise, it returns 0.
+ */
 int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
 {
     unsigned long   byteAlreadyRead = this->oldBufferLen + this->newBufferLen;
@@ -71,6 +98,17 @@ int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
     return 0;
 }
 
+/**
+ * The function reads data from a connection and handles the body if it exceeds a maximum size.
+ * 
+ * @param maxBodySizeExeeded The parameter `maxBodySizeExeeded` is a reference to an integer variable
+ * that is used to indicate whether the maximum body size has been exceeded. It is likely used as a
+ * flag to control the behavior of the `handleBody` function.
+ * @param maxBodySize The parameter `maxBodySize` represents the maximum allowed size for the body of
+ * the connection.
+ * 
+ * @return The function does not have a return type specified, so it does not return anything.
+ */
 void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
 {
     static unsigned long    toRead = 3000;

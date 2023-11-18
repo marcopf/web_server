@@ -68,6 +68,10 @@ std::string	ServerConf::getIndex() const
 {
 	return (this->index);
 }
+std::vector<Location>	ServerConf::locations_getter(void) const
+{
+	return (this->locations);
+}
 
 std::vector<int>	ServerConf::getPorts() const
 {
@@ -90,6 +94,12 @@ std::vector<int>	ServerConf::getPorts() const
 	return (ports);
 }
 
+/**
+ * The above function is an assignment operator overload that copies the values of a ServerConf object
+ * to another ServerConf object.
+ * 
+ * @return a reference to the current object (ServerConf).
+ */
 const ServerConf	&ServerConf::operator=(const ServerConf &cpy)
 {
 	this->listen = cpy.getListen();
@@ -113,6 +123,16 @@ ServerConf::ServerConf(const ServerConf &cpy)
 	*this = cpy;
 }
 
+/**
+ * The function `getLineKeyServ` takes a line of text as input and returns the key (or keyword) found
+ * in that line, based on a predefined list of possible keys.
+ * 
+ * @param line The "line" parameter is a string that represents a line of text.
+ * 
+ * @return The function `getLineKeyServ` returns a string. If the substring `sub` contains any of the
+ * keywords in the `key_list` array, then the corresponding keyword is returned. If none of the
+ * keywords are found in the substring, then the string "null" is returned.
+ */
 std::string	getLineKeyServ(std::string line)
 {
 	std::string sub = line.substr(0, line.find(" "));
@@ -126,6 +146,20 @@ std::string	getLineKeyServ(std::string line)
 	return ("null");
 }
 
+/**
+ * The function `getValP` takes a file and a key as input and returns the corresponding value
+ * associated with that key in the file, or "null" if the key is not found.
+ * 
+ * @param file The `file` parameter is a string that represents the content of a file. It is used to
+ * search for a specific key and retrieve its corresponding value.
+ * @param key The "key" parameter in the given code is a string that represents the key to search for
+ * in the file. It is used to find the corresponding value associated with that key in the file.
+ * 
+ * @return a string value. The specific value being returned depends on the conditions met within the
+ * function. If the key is found in the file and there is a space after the key, the function returns
+ * the substring starting from the space character. If the key is found in the file and there is a
+ * semicolon after the key, the function returns the substring starting from the key and ending before
+ */
 std::string	ServerConf::getValP(std::string file, std::string key)
 {
 	std::stringstream	ss(file);
@@ -152,6 +186,17 @@ std::string	ServerConf::getValP(std::string file, std::string key)
 	return ("null");
 }
 
+/**
+ * The function "appendhost" appends a given string to the /etc/hosts file if it does not already exist
+ * in the file.
+ * 
+ * @param str The parameter "str" is a string that represents the host name or IP address that you want
+ * to append to the "/etc/hosts" file.
+ * 
+ * @return The function does not have a return type specified, so it does not explicitly return
+ * anything. However, it does have a return statement inside an if condition, which will cause the
+ * function to exit early and not execute the remaining code if the condition is true.
+ */
 void	appendhost(std::string str)
 {
 	std::ofstream file("/etc/hosts", std::ios_base::app);
@@ -175,6 +220,13 @@ void	appendhost(std::string str)
 	file.close();
 }
 
+/**
+ * The function "splitHost" takes a string of hosts, splits it into individual host names using
+ * whitespace as a delimiter, and calls the "appendhost" function for each individual host name.
+ * 
+ * @param hosts The parameter "hosts" is a string that contains a list of host names separated by
+ * spaces.
+ */
 void	splitHost(std::string hosts)
 {
 	std::stringstream s_hosts;
@@ -185,6 +237,10 @@ void	splitHost(std::string hosts)
 		appendhost(data);
 }
 
+/**
+ * The function "parse" is used to parse and assign values to various variables in the ServerConf
+ * class.
+ */
 void	ServerConf::parse(void)
 {
 	this->listen = getValP(this->file, "listen");
@@ -228,11 +284,13 @@ ServerConf::ServerConf(void)
 	this->method = "";
 }
 
-std::vector<Location>	ServerConf::locations_getter(void) const
-{
-	return (this->locations);
-}
 
+/**
+ * The function "getLocations" returns a vector of strings containing all occurrences of the word
+ * "location" in the "file" string.
+ * 
+ * @return a vector of strings, which contains the locations found in the "file" string.
+ */
 std::vector<std::string>	ServerConf::getLocations(void)
 {
 	int counter, counter2;

@@ -17,8 +17,19 @@ std::string					General_parser::getFile(void) const
 	return (this->file);
 }
 
+General_parser::General_parser(const General_parser &copy)
+{
+	*this = copy;
+}
+
 General_parser::General_parser(){}
 
+/**
+ * The function checks if the number of opening and closing brackets in a file are equal.
+ * 
+ * @return a boolean value. If the number of opening brackets "{" in the "file" string is equal to the
+ * number of closing brackets "}", then it returns true. Otherwise, it returns false.
+ */
 bool	General_parser::lexer_brackets(void)
 {
 	int openings, closing, i = 0, j = 0;
@@ -40,6 +51,13 @@ bool	General_parser::lexer_brackets(void)
 	return (false);
 }
 
+/**
+ * The function "lineCheck" checks if a given line of code is valid based on certain conditions.
+ * 
+ * @param line The `line` parameter is a string that represents a line of code or text.
+ * 
+ * @return a boolean value.
+ */
 bool	lineCheck(std::string line)
 {
 	std::string ending;
@@ -56,6 +74,14 @@ bool	lineCheck(std::string line)
 	return (false);
 }
 
+/**
+ * The function checks if a given line of code contains any spaces that are not allowed in specific
+ * keywords.
+ * 
+ * @param line The "line" parameter is a string that represents a line of code or text.
+ * 
+ * @return a boolean value.
+ */
 bool	space_check(std::string line)
 {
 	std::string key_list[] = {"location", "listen", "host", "port", "server_name", "err_page", "max_body_size", "root", "autoind", "index", "path", "url", "method", "extension"};
@@ -74,6 +100,11 @@ bool	space_check(std::string line)
 	return (true);
 }
 
+/**
+ * The function `lexer_eol` checks for errors related to spaces and lines in a file.
+ * 
+ * @return a boolean value.
+ */
 bool	General_parser::lexer_eol(void)
 {
 	std::fstream	ss;
@@ -98,6 +129,16 @@ bool	General_parser::lexer_eol(void)
 	return (true);
 }
 
+/**
+ * The General_parser constructor initializes a General_parser object by parsing a configuration file,
+ * creating ServerConf objects for each server listed in the file, and optionally printing information
+ * about the servers and their locations.
+ * 
+ * @param path The `path` parameter is a string that represents the path to a configuration file.
+ * @param printInfo The "printInfo" parameter is an integer that determines whether or not to print
+ * information about the server and its locations. If the value is non-zero, the information will be
+ * printed. If the value is zero, the information will not be printed.
+ */
 General_parser::General_parser(std::string path, int printInfo):path(path)
 {
 	this->file = fileToStr(path);
@@ -120,11 +161,14 @@ General_parser::General_parser(std::string path, int printInfo):path(path)
 	}
 }
 
-General_parser::General_parser(const General_parser &copy)
-{
-	*this = copy;
-}
-
+/**
+ * The function "fileToStr" reads the contents of a file and returns it as a string.
+ * 
+ * @param path The "path" parameter is a string that represents the file path of the file that you want
+ * to convert to a string.
+ * 
+ * @return a string that contains the contents of the file specified by the "path" parameter.
+ */
 std::string		General_parser::fileToStr(std::string path)
 {
 	std::string			str;
@@ -142,6 +186,11 @@ std::string		General_parser::fileToStr(std::string path)
 	return (str);
 }
 
+/**
+ * The function overloads the assignment operator for the General_parser class.
+ * 
+ * @return The object itself is being returned.
+ */
 General_parser &General_parser::operator=(const General_parser &copy)
 {
 	this->servers = copy.getServersConf();
@@ -150,6 +199,12 @@ General_parser &General_parser::operator=(const General_parser &copy)
 	return (*this);
 }
 
+/**
+ * The function `getServers` parses a file and returns a vector of strings containing server
+ * configurations.
+ * 
+ * @return a vector of strings, which contains the server configurations found in the file.
+ */
 std::vector<std::string>	General_parser::getServers(void)
 {
 	int openings, openings2;

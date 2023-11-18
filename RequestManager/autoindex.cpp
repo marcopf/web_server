@@ -1,5 +1,13 @@
 #include "RequestHandler.hpp"
 
+/**
+ * The function "eraseDoubleSlash" removes if present the // turing into /.
+ * 
+ * @param toClean The parameter "toClean" is a string that represents the input string that needs to be
+ * cleaned.
+ * 
+ * @return a string.
+ */
 std::string	eraseDoubleSlash(std::string toClean)
 {
     std::string toRet;
@@ -13,6 +21,15 @@ std::string	eraseDoubleSlash(std::string toClean)
 	return (toClean);
 }
 
+/**
+ * The function `getSearchPath` returns a modified search path based on the current root and requested
+ * URL.
+ * 
+ * @param i The parameter "i" is an integer that represents the index of the current location in the
+ * "info" object.
+ * 
+ * @return a std::string.
+ */
 std::string	RequestHandler::getSearchPath(int i)
 {
 	unsigned long			pos;
@@ -43,6 +60,15 @@ std::string	RequestHandler::getSearchPath(int i)
 	return (ret);
 }
 
+/**
+ * The function "getFileInfo" takes a file path as input and returns the last modified time of the file
+ * as a string.
+ * 
+ * @param path The parameter "path" is a C-style string that represents the path to a file.
+ * 
+ * @return a string that contains the last modification time of the file specified by the given path.
+ * If the function is unable to get the file information, it returns an error message.
+ */
 std::string	getFileInfo(const char *path)
 {
 	struct stat			fileInfo;
@@ -55,6 +81,18 @@ std::string	getFileInfo(const char *path)
 	return (ss.str());
 }
 
+/**
+ * The function `getFileSize` takes a file path as input and returns the size of the file in bytes as a
+ * string.
+ * 
+ * @param path The parameter "path" is a C-style string that represents the path to the file for which
+ * you want to get the file size.
+ * 
+ * @return a string that represents the size of the file specified by the given path. If the function
+ * is able to successfully retrieve the file information using the `stat` function, it will return a
+ * string that contains the file size. If there is an error in retrieving the file information, it will
+ * return a string that indicates the error.
+ */
 std::string	getFileSize(const char *path)
 {
 	struct stat			fileInfo;
@@ -67,6 +105,19 @@ std::string	getFileSize(const char *path)
 	return (ss.str());
 }
 
+/**
+ * The function "autoindex" generates an HTML page displaying the contents of a directory, including
+ * file names, last modification dates, and file sizes.
+ * 
+ * @param directoryPath The directory path is a string that represents the path of the directory for
+ * which the autoindex is being generated. It is passed as the first parameter to the `autoindex`
+ * function.
+ * @param i The parameter `i` in the `autoindex` function is an integer. However, it is not used in the
+ * function and is passed as `(void)i`, indicating that it is not being used or referenced within the
+ * function.
+ * 
+ * @return a string that contains HTML code for generating an autoindex page.
+ */
 std::string	RequestHandler::autoindex(std::string directoryPath, int i)
 {
 	std::stringstream ss;
@@ -108,6 +159,15 @@ std::string	RequestHandler::autoindex(std::string directoryPath, int i)
 	return (ss.str());
 }
 
+/**
+ * The function "callForAutoindex" checks if a given directory path is a file, and if not, it returns
+ * the result of the "autoindex" function.
+ * 
+ * @param i The parameter "i" is an integer that represents the index of the search path. It is used to
+ * retrieve the corresponding directory path from the RequestHandler object.
+ * 
+ * @return a status code and a message.
+ */
 void	RequestHandler::callForAutoindex(int i)
 {
 	std::string directoryPath = this->getSearchPath(i);

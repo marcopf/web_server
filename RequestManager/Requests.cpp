@@ -1,5 +1,13 @@
 #include "RequestHandler.hpp"
 
+/**
+ * The getRequestHandler function handles different types of GET requests and returns the appropriate
+ * response based on the matched location and requested URL.
+ * 
+ * @param matchedLocation The parameter `matchedLocation` is an integer that represents the index of
+ * the matched location in the `locations` vector. It is used to retrieve information about the
+ * location from the `info` object. If `matchedLocation` is -1, it means that no location was matched.
+ */
 void    RequestHandler::getRequestHandler(int matchedLocation)
 {
     unsigned long   pos = this->requestedUrl.find("cgi-bin");
@@ -35,6 +43,17 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
 		atachStatus(NOT_FOUND, ERR_PAGE, "");
 }
 
+/**
+ * The function `getBodyInfo` returns the index of the character after the third occurrence of a
+ * newline character in a given character array.
+ * 
+ * @param body The `body` parameter is a pointer to a character array that represents a body of text.
+ * It is assumed that the text is stored as a null-terminated string.
+ * @param len The parameter `len` represents the length of the `body` string.
+ * 
+ * @return the index of the character in the body string that is two positions after the third
+ * occurrence of the newline character ('\n').
+ */
 int	getBodyInfo(char *body, int len)
 {
 	int i;
@@ -52,6 +71,15 @@ int	getBodyInfo(char *body, int len)
 	return (i + 2);
 }
 
+/**
+ * The function "findFileName" extracts the file name from a given string that contains information
+ * about a file.
+ * 
+ * @param bodyInfo The parameter `bodyInfo` is a string that contains information about a file,
+ * including the file name.
+ * 
+ * @return a string, which is the file name extracted from the bodyInfo string.
+ */
 std::string	findFileName(std::string bodyInfo)
 {
 	std::string	fileName;
@@ -66,6 +94,15 @@ std::string	findFileName(std::string bodyInfo)
 	return (fileName);
 }
 
+/**
+ * The function saves the body of a generic request to a file if the request does not contain a
+ * boundary.
+ * 
+ * @param toAdd The "toAdd" parameter is a string that represents the file path where the file will be
+ * saved.
+ * 
+ * @return a boolean value.
+ */
 bool	RequestHandler::saveGenericBody(std::string toAdd)
 {
 	static int			fileCount;
@@ -84,6 +121,17 @@ bool	RequestHandler::saveGenericBody(std::string toAdd)
 	return false;
 }
 
+/**
+ * The function `saveMultiPartBody` saves a multi-part body of an HTTP request to a file.
+ * 
+ * @param bodyInfo A string containing information about the multipart body, including the boundary and
+ * other details.
+ * @param path The `path` parameter is a string that represents the directory path where the file will
+ * be saved.
+ * @param toAdd The "toAdd" parameter is a string that represents the directory where the file should
+ * be saved. If it is an empty string or "null", the file will be saved in the current directory.
+ * Otherwise, the file will be saved in the specified directory.
+ */
 void	RequestHandler::saveMultiPartBody(std::string bodyInfo, std::string path, std::string toAdd)
 {
 	int				bodyOffeset = getBodyInfo(this->req->getBody(), this->req->getBodySize());
@@ -105,6 +153,17 @@ void	RequestHandler::saveMultiPartBody(std::string bodyInfo, std::string path, s
 	atachStatus(SUCCESS, WELCOME, "");
 }
 
+/**
+ * The postRequestHandler function handles POST requests by saving the request body and executing CGI
+ * scripts if necessary.
+ * 
+ * @param matchedLocation The parameter `matchedLocation` is an integer that represents the index of
+ * the matched location in the `locations` vector. It is used to determine the appropriate CGI bin path
+ * for executing CGI scripts. If `matchedLocation` is -1, it means that no location was matched and the
+ * default CGI bin
+ * 
+ * @return nothing (void).
+ */
 void    RequestHandler::postRequestHandler(int matchedLocation)
 {
 	if (!this->req->getBody())
@@ -133,6 +192,16 @@ void    RequestHandler::postRequestHandler(int matchedLocation)
     }
 }
 
+/**
+ * The deleteRequestHandler function handles the deletion of a file based on the matched location.
+ * 
+ * @param matchedLocation The parameter `matchedLocation` is an integer that represents the index of a
+ * matched location. It is used to determine the upload directory for deleting a file. If
+ * `matchedLocation` is -1, it means that no location was matched and the upload directory will be set
+ * to the default path. Otherwise
+ * 
+ * @return nothing (void).
+ */
 void    RequestHandler::deleteRequestHandler(int matchedLocation)
 {
 	// (void)matchedLocation;

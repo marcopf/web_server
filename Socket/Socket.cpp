@@ -20,6 +20,13 @@ Socket::Socket(const Socket &cpy)
 	*this = cpy;
 }
 
+/**
+ * The function adds a new pollfd to the Socket's pollfds array and creates a new Connection object
+ * associated with the pollfd.
+ * 
+ * @param newPoll The parameter `newPoll` is of type `struct pollfd`. It represents a file descriptor
+ * that will be added to the `pollfds` array in the `Socket` class.
+ */
 void	Socket::addPollFds(struct pollfd newPoll)
 {
 	if (this->pollPos < MAX_CONN)
@@ -31,6 +38,9 @@ void	Socket::addPollFds(struct pollfd newPoll)
 	}
 }
 
+/**
+ * The function removes any poll file descriptors that have encountered an error.
+ */
 void	Socket::removePollFds()
 {
 	for (int i = 1; i <= this->pollPos; i++)
@@ -47,6 +57,15 @@ void	Socket::removePollFds()
 	}
 }
 
+/**
+ * The function `ft_inet_addr` takes a string representation of an IP address and converts it into a
+ * 32-bit integer in network byte order.
+ * 
+ * @param ip The "ip" parameter is a string that represents an IP address in the format "x.x.x.x",
+ * where each "x" is a number between 0 and 255.
+ * 
+ * @return The function `ft_inet_addr` returns a `uint32_t` value, which is an unsigned 32-bit integer.
+ */
 uint32_t	ft_inet_addr(std::string ip)
 {
 	std::stringstream 	ss(ip);
@@ -61,6 +80,16 @@ uint32_t	ft_inet_addr(std::string ip)
 	return (htonl((0 | (ipAddr[0] << 24)) | (ipAddr[1] << 16) | (ipAddr[2] << 8) | ipAddr[3]));
 }
 
+/**
+ * The Socket constructor initializes a server socket and binds it to the specified host and ports.
+ * 
+ * @param data The `data` parameter is of type `ServerConf` and contains information about the server
+ * configuration, such as the host and ports to listen on.
+ * @param envp_main `envp_main` is a pointer to an array of strings that represents the environment
+ * variables passed to the program.
+ * 
+ * @return There is no return statement in the code snippet provided, so nothing is being returned.
+ */
 Socket::Socket(ServerConf data, char **envp_main)
 {
 	int	serverSocket;
@@ -110,6 +139,17 @@ Socket::Socket(ServerConf data, char **envp_main)
 	}
 }
 
+/**
+ * The function sends a crafted response to a socket and sets the revents field of the corresponding
+ * pollfd struct to POLLERR.
+ * 
+ * @param i The parameter "i" is an integer that represents the index of the socket in the pollfds
+ * array. It is used to access the specific socket that needs to be processed in the polloutFunc
+ * function.
+ * @param debug The "debug" parameter is a boolean flag that indicates whether or not to print the
+ * header of the connection to the console. If it is set to true, the header will be printed. If it is
+ * set to false, the header will not be printed.
+ */
 void	Socket::polloutFunc(int i, int debug)
 {
 	RequestHandler craftedRes(this->serverInfo, this->connections[this->pollfds[i].fd], this->envp, this->maxBodySizeExeeded);
@@ -120,6 +160,14 @@ void	Socket::polloutFunc(int i, int debug)
 }
 
 
+/**
+ * The function checks the file descriptors for incoming data or outgoing data and performs
+ * corresponding actions.
+ * 
+ * @param debug The "debug" parameter is an integer that is used to control the level of debugging
+ * information that is printed during the execution of the function. It is likely used to determine
+ * whether or not to print additional information for troubleshooting purposes.
+ */
 void	Socket::checkFd(int debug)
 {
 	int res = poll(this->pollfds, this->pollPos, 1);

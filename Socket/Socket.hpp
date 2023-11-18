@@ -41,11 +41,11 @@ private:
 	struct pollfd 					serverPoll;
 	struct sockaddr_in				clientAddr;
 public:
-	void                            polloutFunc(int i, int debug);
-	void                            pollinFunc(int i);
+	void							polloutFunc(int i, int debug);
+	void							pollinFunc(int i);
 	void							addPollFds(struct pollfd newPoll);
 	void							removePollFds();
-	void                            checkFd(int debug);
+	void							checkFd(int debug);
 	Socket &operator=(const Socket   &cpy);
 	Socket(const Socket &cpy);
 	Socket(void);

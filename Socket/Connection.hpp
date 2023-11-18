@@ -21,26 +21,26 @@
 class Connection
 {
 private:
-    unsigned long   newBufferLen;
-    unsigned long   oldBufferLen;
-    unsigned long   headerSize;
-    unsigned long   bodySize;
-    std::string     header;
-    int             fd;
-    char            *buffer;
-    char            *body;
-    struct pollfd   *pollfd;
+	unsigned long	newBufferLen;
+	unsigned long	oldBufferLen;
+	unsigned long	headerSize;
+	unsigned long	bodySize;
+	std::string  	header;
+	int				fd;
+	char			*buffer;
+	char			*body;
+	struct pollfd	*pollfd;
 public:
-    unsigned long   getBodySize(void);
-    std::string     getHeader(void);
-    char            *getBody(void);
-    void            read(int &maxBodySizeExeeded, int maxBodySize);
-    void            addToBuffer(const char *toAdd);
-    int             handleBody(int &maxBodySizeExeeded, int maxBodySize);
-    Connection(const Connection &cpy);
-    Connection &operator=(const Connection &cpy);
-    Connection(struct pollfd *pollfd);
-    ~Connection();
+	unsigned long	getBodySize(void);
+	std::string		getHeader(void);
+	char			*getBody(void);
+	void			read(int &maxBodySizeExeeded, int maxBodySize);
+	void			addToBuffer(const char *toAdd);
+	int				handleBody(int &maxBodySizeExeeded, int maxBodySize);
+	Connection(const Connection &cpy);
+	Connection &operator=(const Connection &cpy);
+	Connection(struct pollfd *pollfd);
+	~Connection();
 };
 
 #endif

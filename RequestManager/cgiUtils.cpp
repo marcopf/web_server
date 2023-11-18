@@ -1,70 +1,18 @@
 #include "RequestHandler.hpp"
 
-char **createMat(std::string command, std::string path, char  *cgiParamater)
-{
-	char **mat;
-	mat = (char **)malloc(sizeof(char *) * 3);
-	if (command == "./")
-		command += path;
-	mat[0] = strdup(command.c_str());
-	if (cgiParamater)
-		mat[1] = strdup((path + " " + std::string(cgiParamater)).c_str());
-	else
-		mat[1] = strdup(path.c_str());
-	mat[2] = NULL;
 
-	return (mat);
-}
-
-void	freeMat(char **mat)
-{
-	int	i;
-
-	i = 0;
-	while (mat[i])
-	{
-		free(mat[i]);
-		mat[i] = 0;
-		i++;
-	}
-	free(mat);
-	mat = 0;
-}
-
-//RETURN EXECUTER PROGRAM ABSOLUTE PATH AFTER EXTENSION IS CHECKED
-std::string	extensionFinder(std::string path)
-{
-	unsigned long pos = path.find_last_of(".");
-
-	if (pos != std::string::npos && path.substr(pos) == ".py")
-		return (PYTHON);
-	if (pos != std::string::npos && path.substr(pos) == ".php")
-		return (PHP);
-	return ("./");
-}
-
-char	**convertVector(std::vector<std::string> vect)
-{
-	char	**ret;
-
-	ret = (char **)malloc(sizeof(char *) * (vect.size() + 1));
-	ret[vect.size()] = 0;
-	for (unsigned long i = 0; i < vect.size(); i++)
-		ret[i] = strdup(vect[i].c_str());
-	return (ret);
-}
-
-std::string	fileToStr(std::string file)
-{
-	std::string str;
-	std::ifstream f(file.c_str());
-	std::ostringstream ss;
-	ss << f.rdbuf();
-	str = ss.str();
-	f.close();
-	return (str);
-}
-
+/**
+ * The function `waitAndCheck` waits for a child process to finish and checks if it exited normally or
+ * encountered an error.
+ * 
+ * @param pid The `pid` parameter is the process ID of the child process that the `waitAndCheck`
+ * function is waiting for.
+ * @param fd The parameter `fd` is a pointer to an integer. It is used to pass a file descriptor to the
+ * function `waitAndCheck`. The function uses this file descriptor to close the write end of a pipe
+ * (`fd[1]`) after it is done with it.
+ * 
+ * @return a std::string.
+ */
 std::string	RequestHandler::waitAndCheck(int pid, int *fd)
 {
 	std::time_t	start = time(0);
@@ -89,15 +37,22 @@ std::string	RequestHandler::waitAndCheck(int pid, int *fd)
 	return ("OK");
 }
 
-std::string atachStatusCgi(const char *status, const char *body)
-{
-	std::stringstream ss;
-	std::string status_s = status, body_s = body;
-	ss << "\r\nContent-length: " << body_s.length() << "\r\n" << "Content-Type: text/html"  << "\r\n\r\n";
-	std::string res = status_s + ss.str() + body_s + "\r\n";
-	return (res);
-}
-
+/**
+ * The function `executeFile` executes a file specified by the `path` parameter, using the appropriate
+ * command based on the file extension, and returns the result.
+ * 
+ * @param path The `path` parameter is a string that represents the file path of the file to be
+ * executed.
+ * @param envp The `envp` parameter is a vector of strings that represents the environment variables
+ * for the executed file. Each string in the vector should be in the format "variable=value". These
+ * environment variables will be passed to the executed file when using the `execve` function.
+ * @param cgiParameter The `cgiParameter` parameter is a character pointer that represents the CGI
+ * parameter. It is used in the `createMat` function to create the matrix `mat` which is then passed to
+ * the `execve` function. The `execve` function is responsible for executing the CGI script specified
+ * by
+ * 
+ * @return The function does not have a return type specified, so it is likely returning void.
+ */
 void	RequestHandler::executeFile(std::string path, std::vector<std::string> envp, char *cgiParameter)
 {
 	std::string		executed, result, command = extensionFinder(path);

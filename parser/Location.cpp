@@ -79,6 +79,16 @@ Location &Location::operator=(const Location &copy)
     return(*this);
 }
 
+/**
+ * The function `getLineKey` takes a line of text as input and returns the key (or keyword) found in
+ * that line, based on a predefined list of possible keys.
+ * 
+ * @param line The `line` parameter is a string that represents a line of text.
+ * 
+ * @return The function `getLineKey` returns a string. If the substring `sub` contains any of the
+ * keywords in the `key_list` array, then the corresponding keyword is returned. If none of the
+ * keywords are found in the substring, then the string "null" is returned.
+ */
 std::string	getLineKey(std::string line)
 {
 	std::string sub = line.substr(0, line.find(" "));
@@ -92,6 +102,17 @@ std::string	getLineKey(std::string line)
 	return ("null");
 }
 
+/**
+ * The function `getValL` takes a file and a key as input and returns the corresponding value
+ * associated with that key in the file.
+ * 
+ * @param file The `file` parameter is a string that represents the file from which the data is being
+ * read.
+ * @param key The "key" parameter is a string that represents the key you are searching for in the
+ * "file" string.
+ * 
+ * @return a string value.
+ */
 std::string	Location::getValL(std::string file, std::string key) const
 {
 	std::stringstream	ss(file);

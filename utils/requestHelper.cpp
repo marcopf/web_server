@@ -1,5 +1,12 @@
 #include "utils.hpp"
 
+/**
+ * The function `getContentLength` returns the length of the body in a given HTTP header.
+ * 
+ * @param header The parameter "header" is a string that represents the HTTP header of a response.
+ * 
+ * @return the content length as an unsigned long integer.
+ */
 unsigned long getContentLenght(std::string header)
 {
 	int	pos;
@@ -17,6 +24,21 @@ unsigned long getContentLenght(std::string header)
 	return (len);
 }
 
+/**
+ * The function `ft_strnstr` searches for the first occurrence of a substring `needle` in a string
+ * `haystack` within a specified length `len`.
+ * 
+ * @param haystack A pointer to the string in which to search for the needle.
+ * @param needle The `needle` parameter is a pointer to the substring that we are searching for within
+ * the `haystack` string.
+ * @param len The parameter "len" is of type "size_t" and represents the maximum number of characters
+ * to search in the "haystack" string.
+ * 
+ * @return The function `ft_strnstr` returns a pointer to the first occurrence of the `needle` string
+ * within the `haystack` string, up to a maximum of `len` characters. If the `needle` string is empty
+ * or `NULL`, it returns a pointer to the `haystack` string. If the `haystack` string is `NULL` and
+ * `len` is
+ */
 char	*ft_strnstr(const char *haystack, const char *needle, size_t len)
 {
 	size_t		i;
@@ -43,6 +65,19 @@ char	*ft_strnstr(const char *haystack, const char *needle, size_t len)
 	return (NULL);
 }
 
+/**
+ * The function "headerLen" calculates the length of a header string within a given haystack string, up
+ * to a specified length.
+ * 
+ * @param haystack The `haystack` parameter is a pointer to a character array (string) that represents
+ * the larger string in which we want to search for the `needle` string.
+ * @param needle The needle parameter is a pointer to a character array that represents the substring
+ * we are searching for within the haystack string.
+ * @param len The parameter "len" represents the length of the haystack string.
+ * 
+ * @return the index of the first occurrence of the needle string within the haystack string, within
+ * the specified length. If the needle is not found, it returns 0.
+ */
 unsigned long headerLen(const char *haystack, const char *needle, size_t len)
 {
 	size_t		i;
@@ -69,6 +104,15 @@ unsigned long headerLen(const char *haystack, const char *needle, size_t len)
 	return (0);
 }
 
+/**
+ * The function "findUrl" takes a string as input and returns the URL found between the first and
+ * second space in the string, or "NULL" if no URL is found.
+ * 
+ * @param req The parameter "req" is a string that represents a request.
+ * 
+ * @return a string. If a valid URL is found in the input string, it will return that URL. Otherwise,
+ * it will return the string "NULL".
+ */
 std::string findUrl(std::string req)
 {
 	unsigned long firstSpace;

@@ -79,6 +79,10 @@ public:
 };
 
 bool		isDir(const char *path);
+std::string	fileToStr(std::string file);
+char	    **convertVector(std::vector<std::string> vect);
+char        **createMat(std::string command, std::string path, char  *cgiParamater);
+std::string	extensionFinder(std::string path);
 bool		isFile(const char *path);
 bool 		fileExists(const char* fileName);
 void		freeMat(char **mat);

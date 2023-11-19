@@ -51,7 +51,7 @@ void    Connection::addToBuffer(const char *toAdd)
     unsigned long   i, j;
 
     newBuffer = new char [this->oldBufferLen + this->newBufferLen];
-    memset(newBuffer, 0, this->oldBufferLen + this->newBufferLen);
+    ft_memset(newBuffer, 0, this->oldBufferLen + this->newBufferLen);
     for (i = 0; i < this->oldBufferLen; i++)
         newBuffer[i] = this->buffer[i];
     for (j = 0; j < this->newBufferLen; j++)
@@ -89,7 +89,7 @@ int     Connection::handleBody(int &maxBodySizeExeeded, int maxBodySize)
         if (this->bodySize > 0 && (this->headerSize + this->bodySize) <= byteAlreadyRead)
         {
             this->body = new char [this->bodySize];
-            memcpy(this->body, ft_strnstr(this->buffer, "\r\n\r\n", this->oldBufferLen + this->newBufferLen) + 4, this->bodySize);
+            ft_memcpy(this->body, ft_strnstr(this->buffer, "\r\n\r\n", this->oldBufferLen + this->newBufferLen) + 4, this->bodySize);
             return (1);
         }
         if (this->bodySize == 0 || (this->headerSize + this->bodySize) <= byteAlreadyRead)
@@ -121,12 +121,19 @@ void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
         return ;
     }
     tempBuffer = new char [toRead];
-    memset(tempBuffer, 0, toRead);
+    ft_memset(tempBuffer, 0, toRead);
     recvRet = recv(this->fd, tempBuffer, toRead, MSG_DONTWAIT);
     if (recvRet == -1)
-        std::cerr << "recv Error" << std::endl;
+    {
+        this->pollfd->events = POLLERR;
+        return ;
+    }
     else if (recvRet == 0)
-        std::cerr << "empty read" << std::endl;
+    {
+        std::cout << "empty read" << std::endl;
+        this->pollfd->events = POLLOUT;
+        return ;
+    }
     this->oldBufferLen += this->newBufferLen;
     this->newBufferLen = recvRet;
     this->addToBuffer(tempBuffer);

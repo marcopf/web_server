@@ -125,3 +125,39 @@ std::string findUrl(std::string req)
 		return (req.substr(firstSpace + 1, secondSpace - firstSpace - 1));
 	return ("NULL");
 }
+
+void	*ft_memset(void *b, int c, size_t len)
+{
+	size_t			i;
+	char			*ptr;
+
+	ptr = (char *)b;
+	i = 0;
+	while (i < len)
+	{
+		ptr[i] = (unsigned char) c;
+		i++;
+	}
+	return (b);
+}
+
+void	*ft_memcpy(void *dst, const void *src, size_t n)
+{
+	const char		*ptr_src;
+	char			*ptr_dst;
+	size_t			i;
+
+	if ((dst == src) || n == 0)
+		return (dst);
+	if (!dst && !src)
+		return (0);
+	i = 0;
+	ptr_src = (const char *) src;
+	ptr_dst = (char *) dst;
+	while (i < n)
+	{
+		ptr_dst[i] = ptr_src[i];
+		i++;
+	}
+	return (dst);
+}

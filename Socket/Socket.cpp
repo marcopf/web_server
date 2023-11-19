@@ -2,7 +2,7 @@
 
 Socket	&Socket::operator=(const Socket &cpy)
 {
-	memcpy(this->pollfds, cpy.pollfds, sizeof(struct pollfd) * MAX_CONN);
+	ft_memcpy(this->pollfds, cpy.pollfds, sizeof(struct pollfd) * MAX_CONN);
 	this->serverInfo = cpy.serverInfo;
 	this->envp = cpy.envp;
 	this->pollPos = cpy.pollPos;
@@ -96,7 +96,7 @@ Socket::Socket(ServerConf data, char **envp_main)
     int portsOption[this->serverInfo.getPorts().size()], i = -1;
 	std::string	hostValue;
 	
-	memset(this->pollfds, 0, sizeof(struct pollfd) * MAX_CONN);
+	ft_memset(this->pollfds, 0, sizeof(struct pollfd) * MAX_CONN);
 	while (envp_main[++i])
 		this->envp.push_back(envp_main[i]);
 	this->maxBodySizeExeeded = 0;
@@ -131,7 +131,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 			close(serverSocket);
 			exit(1);
 		}
-		memset(&this->serverPoll, 0, sizeof(this->serverPoll));
+		ft_memset(&this->serverPoll, 0, sizeof(this->serverPoll));
 		this->serverPoll.fd = serverSocket;
 		this->serverPoll.events = POLLIN;
 		addPollFds(this->serverPoll);

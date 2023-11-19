@@ -29,6 +29,8 @@ std::string		findMethod(Connection *req, ServerConf info, std::vector<std::strin
 std::string		findUrl(std::string req);
 char	        *ft_strnstr(const char *haystack, const char *needle, size_t len);
 unsigned long   headerLen(const char *haystack, const char *needle, size_t len);
+void            *ft_memset(void *b, int c, size_t len);
+void            *ft_memcpy(void *dst, const void *src, size_t n);
 
 
 

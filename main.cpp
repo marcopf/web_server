@@ -18,9 +18,60 @@ void stop(int dummy)
 	keepRunning = 0;
 }
 
+/**
+ * The function checks if a given path is a directory or not.
+ * 
+ * @param path The path parameter is a string that represents the directory path that you want to
+ * check.
+ * 
+ * @return The function isDir returns a boolean value. It returns true if the given path is a
+ * directory, and false if it is not a directory or if there was an error opening the directory.
+ */
+bool	isValidDir(const char *path)
+{
+	DIR*	temp;
+
+	temp = opendir(path);
+	if (temp == NULL)
+		return (false);
+	closedir(temp);
+	return (true);
+}
+
+std::vector<std::string> getPossibleDir(General_parser parsedInfo)
+{
+	std::vector<ServerConf> servers = parsedInfo.getServersConf();
+	std::vector<std::string> ret;
+
+	for (unsigned int i = 0; i < servers.size(); i++)
+	{
+		if (servers[i].getPath() != "null")
+			ret.push_back(servers[i].getPath());
+		std::vector<Location> locations = servers[i].locations_getter();
+		for (unsigned int j = 0; j < locations.size(); j++)
+		{
+			if (locations[j].getPath() != "null")
+				ret.push_back(locations[j].getPath());
+		}
+	}
+	return (ret);
+}
+
+bool	isInVect(std::vector<std::string> cont, std::string val)
+{
+	for (unsigned long i = 0; i < cont.size(); i++)
+	{
+		if (val == cont[i])
+			return (true);
+	}
+	return (false);
+}
+
 int	checkParsedInfo(General_parser parsedInfo)
 {
 	std::vector<ServerConf> servers = parsedInfo.getServersConf();
+	std::vector<std::string> possibleDir = getPossibleDir(parsedInfo);
+
 	int flag = 0;
 
 	if (servers.size() == 0)
@@ -36,9 +87,9 @@ int	checkParsedInfo(General_parser parsedInfo)
 			std::cerr << RED << "PORT is missing in server[" << i << "]" << END << std::endl;
 			flag = 1;
 		}
-		if (servers[i].getRoot() == "null")
+		if (servers[i].getRoot() == "null" || (!isInVect(possibleDir, servers[i].getRoot()) && !isValidDir(servers[i].getRoot().c_str())))
 		{
-			std::cerr << RED << "ROOT is missing in server[" << i << "]" << END << std::endl;
+			std::cerr << RED << "ROOT is missing or invalid in server[" << i << "]" << END << std::endl;
 			flag = 1;
 		}
 		if (servers[i].getPath() == "null")
@@ -53,9 +104,9 @@ int	checkParsedInfo(General_parser parsedInfo)
 		}	
 		for (unsigned int j = 0; j < locations.size(); j++)
 		{
-			if (locations[j].getRoot() == "null")
+			if (locations[j].getRoot() == "null" || (!isInVect(possibleDir, locations[j].getRoot()) && !isValidDir(locations[j].getRoot().c_str())))
 			{
-				std::cerr << RED << "ROOT is missing in server[" << i << "]" << "location[" << j << "]" << END << std::endl;
+				std::cerr << RED << "ROOT is missing or invalid in server[" << i << "]" << "location[" << j << "]" << END << std::endl;
 				flag = 1;
 
 			}

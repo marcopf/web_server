@@ -123,6 +123,10 @@ void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
     tempBuffer = new char [toRead];
     memset(tempBuffer, 0, toRead);
     recvRet = recv(this->fd, tempBuffer, toRead, MSG_DONTWAIT);
+    if (recvRet == -1)
+        std::cerr << "recv Error" << std::endl;
+    else if (recvRet == 0)
+        std::cerr << "empty read" << std::endl;
     this->oldBufferLen += this->newBufferLen;
     this->newBufferLen = recvRet;
     this->addToBuffer(tempBuffer);

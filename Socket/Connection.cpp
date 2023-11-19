@@ -118,7 +118,6 @@ void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
     if (this->handleBody(maxBodySizeExeeded, maxBodySize))
     {
         this->pollfd->events = POLLOUT;
-        	std::cout << this->buffer << std::endl;
         return ;
     }
     tempBuffer = new char [toRead];

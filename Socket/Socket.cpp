@@ -114,7 +114,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		if (serverSocket == -1)
 		{
 			std::cerr << RED << "Error socket init.." << END << std::endl;
-			exit(1);
+			throw(1);
 		}
 		serverAddr.sin_family = AF_INET;
 		serverAddr.sin_port = htons(this->serverInfo.getPorts()[i]);
@@ -129,7 +129,7 @@ Socket::Socket(ServerConf data, char **envp_main)
 		{
 			std::cerr << RED << "error listening socket..." << END << std::endl;	
 			close(serverSocket);
-			exit(1);
+			throw(1);
 		}
 		ft_memset(&this->serverPoll, 0, sizeof(this->serverPoll));
 		this->serverPoll.fd = serverSocket;

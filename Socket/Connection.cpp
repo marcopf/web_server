@@ -130,7 +130,6 @@ void    Connection::read(int &maxBodySizeExeeded, int maxBodySize)
     }
     else if (recvRet == 0)
     {
-        std::cout << "empty read" << std::endl;
         this->pollfd->events = POLLOUT;
         return ;
     }

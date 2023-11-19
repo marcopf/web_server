@@ -145,7 +145,7 @@ General_parser::General_parser(std::string path, int printInfo):path(path)
 	if (!lexer_brackets() || !lexer_eol())
 	{
 		std::cerr << YELLOW << "ERROR IN CONFIGURATION FILE" << END << std::endl;
-		exit(3);
+		throw(3);
 	}
 	std::vector<std::string> server_list = getServers();
 	for (unsigned int i = 0; i < server_list.size(); i++)
@@ -178,7 +178,7 @@ std::string		General_parser::fileToStr(std::string path)
 	if (f.fail())
 	{
 		std::cerr << RED <<  "FILE DOES NOT EXIT!!" << END << std::endl;
-		exit(2);
+		throw(2);
 	}
 	ss << f.rdbuf();
 	str = ss.str();

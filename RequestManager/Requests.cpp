@@ -16,7 +16,6 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     std::string		completePath = getSearchPath(matchedLocation);
 
     addNewEnvp();
-	std::cout << isDir(completePath.c_str()) << std::endl;
     if (matchedLocation == -1 && this->requestedUrl == "/")
 	{
 		if (this->info.getIndex() != "null" && fileExists(this->info.getIndex().c_str()))
@@ -31,7 +30,7 @@ void    RequestHandler::getRequestHandler(int matchedLocation)
     }
     else if (!isDir(completePath.c_str()) && fileExists(completePath.c_str()))
 		atachStatus(SUCCESS, completePath.c_str(), "");
-	else if (isDir(completePath.c_str()) || matchedLocation > -1)
+	else if (isDir(completePath.c_str()))
 	{
 		if (matchedLocation >= 0 && this->info.locations_getter()[matchedLocation].getIndex() != "null" && fileExists(this->info.locations_getter()[matchedLocation].getIndex().c_str()))
 			atachStatus(SUCCESS, this->info.locations_getter()[matchedLocation].getIndex().c_str(), "");

@@ -46,12 +46,18 @@ std::vector<std::string> getPossibleDir(General_parser parsedInfo)
 	for (unsigned int i = 0; i < servers.size(); i++)
 	{
 		if (servers[i].getPath() != "null")
+		{
 			ret.push_back(servers[i].getPath());
+			mkdir(servers[i].getPath().c_str(), 0777);
+		}
 		std::vector<Location> locations = servers[i].locations_getter();
 		for (unsigned int j = 0; j < locations.size(); j++)
 		{
 			if (locations[j].getPath() != "null")
+			{
 				ret.push_back(locations[j].getPath());
+				mkdir(locations[j].getPath().c_str(), 0777);
+			}
 		}
 	}
 	return (ret);
@@ -140,11 +146,13 @@ int main(int argc, char **argv, char **envp)
 		return (0);
 	}
 	if (argc == 2)
-		parser = General_parser(argv[1], debug);
+		debug = 0;
 	if (argc == 3  && std::string(argv[2]) == "--debug")
-	{
 		debug = 1;
+	try{
 		parser = General_parser(argv[1], debug);
+	}catch(int e){
+		return (e);
 	}
 	if (checkParsedInfo(parser))
 	{
@@ -155,17 +163,23 @@ int main(int argc, char **argv, char **envp)
 	(void)argc;
 	for (unsigned int i = 0; i < list.size(); i++)
 	{
-		Socket *temp = new Socket(list[i], envp);
-		sockets.push_back(temp);
+		try{
+			Socket *temp = new Socket(list[i], envp);
+			sockets.push_back(temp);
+		}catch(int e){
+			return (e);
+		}
 	}
 	while (keepRunning)
 	{
 		for (unsigned int i = 0; i < list.size(); i++)
 			sockets[i]->checkFd(debug);
 	}
-	std::cout << "hey sono uscito" << std::endl;
+	std::cout << std::endl << GREEN << "CLEANING UP..."  << END<< std::endl;
 	for (unsigned int i = 0; i < list.size(); i++)
 	{
 		delete sockets[i];
 	}
+	std::cout << GREEN << "DONE!" << END << std::endl;
+
 }

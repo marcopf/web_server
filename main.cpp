@@ -21,28 +21,58 @@ void stop(int dummy)
 int	checkParsedInfo(General_parser parsedInfo)
 {
 	std::vector<ServerConf> servers = parsedInfo.getServersConf();
+	int flag = 0;
 
+	if (servers.size() == 0)
+	{
+		std::cerr << RED << "NO SERVER CONFIGURATION FOUND..."<< END << std::endl;
+		flag = 1;
+	}
 	for (unsigned int i = 0; i < servers.size(); i++)
 	{
 		std::vector<Location> locations = servers[i].locations_getter();
 		if (servers[i].getPort() == "null")
-			return (1);
+		{
+			std::cerr << RED << "PORT is missing in server[" << i << "]" << END << std::endl;
+			flag = 1;
+		}
 		if (servers[i].getRoot() == "null")
-			return (1);
+		{
+			std::cerr << RED << "ROOT is missing in server[" << i << "]" << END << std::endl;
+			flag = 1;
+		}
 		if (servers[i].getPath() == "null")
-			return (1);
+		{
+			std::cerr << RED << "PATH is missing in server[" << i << "]" << END << std::endl;
+			flag = 1;
+		}
 		if (servers[i].getMethod() == "null")
-			return (1);
+		{
+			std::cerr << RED << "METHOD is missing in server[" << i << "]" << END << std::endl;
+			flag = 1;
+		}	
 		for (unsigned int j = 0; j < locations.size(); j++)
 		{
 			if (locations[j].getRoot() == "null")
-				return (1);
+			{
+				std::cerr << RED << "ROOT is missing in server[" << i << "]" << "location[" << j << "]" << END << std::endl;
+				flag = 1;
+
+			}
 			if (locations[j].getPath() == "null")
-				return (1);
+			{
+				std::cerr << RED << "PATH is missing in server[" << i << "]" << "location[" << j << "]" << END << std::endl;
+				flag = 1;
+			}
 			if (locations[j].getMethod() == "null")
-				return (1);
+			{
+				std::cerr << RED << "METHOD is missing in server[" << i << "]" << "location[" << j << "]" << END << std::endl;
+				flag = 1;
+			}
 		}
 	}
+	if (flag)
+		return (1);
 	return (0);
 }
 

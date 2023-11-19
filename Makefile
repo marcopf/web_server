@@ -1,4 +1,4 @@
-NAME    = server
+NAME    = webserv
 HEADER  = ${NAME:.a=.h}
 SRCS    = $(wildcard *.cpp) $(wildcard Socket/*.cpp) $(wildcard parser/*.cpp) $(wildcard RequestManager/*.cpp) $(wildcard utils/*.cpp)
 OBJS    = ${SRCS:.cpp=.o}

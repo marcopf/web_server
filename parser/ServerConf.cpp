@@ -168,6 +168,8 @@ std::string	ServerConf::getValP(std::string file, std::string key)
 
 	while (getline(ss, data, '\n'))
 	{
+		if (data.find("location") != std::string::npos && data[data.length() - 1] == '{')
+			return ("null");
 		if (key != getLineKeyServ(data))
 			continue ;
 		if (data.find(key) != std::string::npos && data.find(" ") != std::string::npos)
